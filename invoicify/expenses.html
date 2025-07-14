@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses - Invoicify</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
+            <a href="dashboard.html" class="text-white text-2xl font-semibold px-4">Invoicify</a>
+            <nav>
+                <a href="dashboard.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Dashboard</a>
+                <a href="invoices.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Invoices</a>
+                <a href="clients.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Clients</a>
+                <a href="time-logs.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Time Logs</a>
+                <a href="expenses.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 bg-gray-700">Expenses</a>
+                <a href="reports.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Reports</a>
+                <a href="settings.html" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Settings</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top Bar -->
+            <div class="bg-white shadow-md p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <button id="sidebarToggle" class="text-gray-500 focus:outline-none md:hidden">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                    <h1 class="text-2xl font-bold text-gray-800 ml-4">Expenses</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button id="notificationBell" class="relative p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2 hidden">3</span>
+                        </button>
+                        <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl overflow-hidden z-20 hidden">
+                            <!-- Notification items will be injected by JS -->
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button id="topBarUserMenuButton" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
+                            <img class="h-8 w-8 rounded-full object-cover" src="https://via.placeholder.com/150" alt="User photo">
+                        </button>
+                        <div id="topBarUserMenuDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20 hidden">
+                            <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <a href="login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-6">
+                <!-- Add Expense Form -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Add Expense</h2>
+                    <form id="expense-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="expense-description" class="block text-sm font-medium text-gray-700">Description</label>
+                                <input type="text" id="expense-description" name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                            </div>
+                            <div>
+                                <label for="expense-amount" class="block text-sm font-medium text-gray-700">Amount</label>
+                                <input type="number" id="expense-amount" name="amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                            </div>
+                            <div>
+                                <label for="expense-date" class="block text-sm font-medium text-gray-700">Date</label>
+                                <input type="date" id="expense-date" name="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                            </div>
+                            <div>
+                                <label for="expense-receipt" class="block text-sm font-medium text-gray-700">Receipt</label>
+                                <input type="file" id="expense-receipt" name="receipt" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                                Add Expense
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Expenses List -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Logged Expenses</h2>
+                    <div id="expenses-list" class="space-y-4">
+                        <!-- Expense items will be injected by JS -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="main.js"></script>
+    <script src="guards.js"></script>
+    <script src="expenses.js"></script>
+</body>
+</html>
