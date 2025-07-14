@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Placeholder for main.js and storage.js -->
+    <!-- <script src="main.js" defer></script> -->
+    <!-- <script src="storage.js" defer></script> -->
+    <style>
+        /* Minimal style for active filter button */
+        .filter-active {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+        }
+              /* Responsive sidebar (matches dashboard.html) */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80vw;
+                min-width: 0;
+                max-width: 20rem;
+                transform: translateX(-100%);
+                position: fixed;
+                left: 0;
+                top: 0;
+                z-index: 50;
+            }
+            #sidebar.-translate-x-0 {
+                transform: translateX(0);
+            }
+            #sidebarCollapse {
+                display: block !important;
+            }
+            #sidebarExpand {
+                display: block !important;
+            }
+            .md\:ml-64 {
+                margin-left: 0 !important;
+            }
+        }
+        /* Responsive tweaks for invoices table and layout */
+        @media (max-width: 640px) {
+            .responsive-table table {
+                font-size: 0.95rem;
+            }
+            .responsive-table th, .responsive-table td {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                white-space: nowrap;
+            }
+            .responsive-table {
+                margin-left: -1rem;
+                margin-right: -1rem;
+            }
+            .flex.md\:flex-row {
+                flex-direction: column !important;
+            }
+            .p-6 {
+                padding: 1rem !important;
+            }
+            .p-4 {
+                padding: 1rem !important;
+            }
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+                --tw-space-y-reverse: 0;
+                margin-top: 1.25rem !important;
+                margin-bottom: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+    <!-- Sidebar (matches dashboard.html/settings.html) -->
+    <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 min-h-screen p-4 space-y-6 transition-transform duration-300 ease-in-out border-r border-gray-200 shadow-md fixed left-0 top-0 h-full -translate-x-full md:translate-x-0 z-40 md:block">
+        <button id="sidebarCollapse" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Collapse Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="text-center">
+            <a href="index.html" class="text-2xl font-semibold text-white">Invoicify</a>
+        </div>
+        <nav class="space-y-2">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="invoices.html" class="flex items-center space-x-3 px-4 py-2 rounded-md bg-slate-700 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <span>Invoices</span>
+            </a>
+            <a href="clients.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span>Clients</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.835 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.835 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.835-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-slate-700">
+            <a href="index.html" class="flex items-center space-x-3 px-4 py-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col relative md:ml-64 ml-0 transition-all duration-300">
+        <button id="sidebarExpand" class="fixed top-4 left-4 z-30 bg-white border border-gray-200 shadow p-2 rounded-full text-gray-400 hover:text-blue-600 focus:outline-none md:hidden" title="Expand Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sticky top-0 z-20">
+            <h1 class="text-xl font-semibold text-gray-700">Manage Invoices</h1>
+            <div class="flex items-center space-x-4">
+                <a href="invoice-new.html" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                    <span>New Invoice</span>
+                </a>
+                <!-- User Profile/Notifications (same as dashboard) -->
+                 <button class="relative text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                </button>
+                <div class="relative">
+                    <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User+Name&background=random&color=fff" alt="User Avatar">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-6 space-y-6">
+            <!-- Filters and Search -->
+            <section class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 md:space-x-4">
+                    <div class="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0">
+                        <span class="text-sm font-medium text-gray-600">Filter by:</span>
+                        <button data-filter="all" class="filter-btn px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100 filter-active">All</button>
+                        <button data-filter="paid" class="filter-btn px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100">Paid</button>
+                        <button data-filter="unpaid" class="filter-btn px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100">Unpaid</button>
+                        <button data-filter="overdue" class="filter-btn px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100">Overdue</button>
+                        <button data-filter="draft" class="filter-btn px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-100">Draft</button>
+                    </div>
+                    <div class="relative w-full md:w-auto">
+                        <input type="text" id="searchInput" placeholder="Search invoices (e.g., #ID, Client)"
+                               class="w-full md:w-72 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Invoices Table -->
+            <section class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="responsive-table overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200" id="invoicesTable">
+        <style>
+        /* Responsive tweaks for invoices table */
+        @media (max-width: 640px) {
+            .responsive-table table {
+                font-size: 0.95rem;
+            }
+            .responsive-table th, .responsive-table td {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                white-space: nowrap;
+            }
+            .responsive-table {
+                margin-left: -1rem;
+                margin-right: -1rem;
+            }
+            .flex.md\:flex-row {
+                flex-direction: column !important;
+            }
+        }
+        </style>
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="invoicesTableBody">
+                            <!-- Sample Data Rows (to be replaced by JS) -->
+                            <tr data-status="paid" data-client="Tech Solutions Inc." data-id="INV-2024-001">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline"><a href="invoice-preview.html?id=INV-2024-001">INV-2024-001</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Tech Solutions Inc.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-01</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$1,250.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="invoice-preview.html?id=INV-2024-001" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                            <tr data-status="unpaid" data-client="Creative Designs LLC" data-id="INV-2024-002">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline"><a href="invoice-preview.html?id=INV-2024-002">INV-2024-002</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Creative Designs LLC</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-05</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-20</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$800.50</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Unpaid</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="invoice-preview.html?id=INV-2024-002" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                    <a href="invoice-new.html?edit_id=INV-2024-002" class="text-yellow-600 hover:text-yellow-900">Edit</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                            <tr data-status="overdue" data-client="WebWorks Co." data-id="INV-2024-003">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline"><a href="invoice-preview.html?id=INV-2024-003">INV-2024-003</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">WebWorks Co.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-06-10</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-06-25</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$2,100.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Overdue</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="invoice-preview.html?id=INV-2024-003" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                             <tr data-status="draft" data-client="New Client Prospect" data-id="DRAFT-001">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 hover:underline"><a href="invoice-new.html?edit_id=DRAFT-001">DRAFT-001</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">New Client Prospect</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-18</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$500.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-700">Draft</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="invoice-new.html?edit_id=DRAFT-001" class="text-yellow-600 hover:text-yellow-900">Edit</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                            <!-- No Invoices Message (hidden by default) -->
+                            <tr id="noInvoicesMessageRow" class="hidden">
+                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p class="mt-2 text-lg">No invoices found.</p>
+                                    <p class="mt-1 text-sm">Try adjusting your filters or <a href="invoice-new.html" class="text-blue-500 hover:underline">create a new invoice</a>.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination (Placeholder) -->
+                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    <p class="text-sm text-gray-600">Showing <span id="showingCount">1</span> to <span id="toCount">4</span> of <span id="totalCount">4</span> results</p>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">Next</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Sidebar Collapse/Expand (matches dashboard.html/settings.html) ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarExpand = document.getElementById('sidebarExpand');
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('-translate-x-0');
+            if (window.innerWidth < 768) {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.remove('hidden');
+            } else {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.add('hidden');
+            }
+        }
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('-translate-x-0');
+            if (window.innerWidth < 768) {
+                sidebarCollapse.classList.remove('hidden');
+                sidebarExpand.classList.add('hidden');
+            } else {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.add('hidden');
+            }
+        }
+        if (sidebarCollapse) {
+            sidebarCollapse.addEventListener('click', closeSidebar);
+        }
+        if (sidebarExpand) {
+            sidebarExpand.addEventListener('click', openSidebar);
+        }
+        // On load and resize, always close sidebar on mobile, open on desktop, and set button visibility
+        function handleSidebarOnLoad() {
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+        window.addEventListener('resize', handleSidebarOnLoad);
+        handleSidebarOnLoad();
+
+        // --- Invoice Filtering and Searching (Static/Placeholder) ---
+        // ...existing code for filtering/searching...
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('invoicesTableBody');
+        const allRows = Array.from(tableBody.querySelectorAll('tr:not(#noInvoicesMessageRow)'));
+        const noInvoicesMessageRow = document.getElementById('noInvoicesMessageRow');
+        const showingCountEl = document.getElementById('showingCount');
+        const toCountEl = document.getElementById('toCount');
+        const totalCountEl = document.getElementById('totalCount');
+        let currentFilter = 'all';
+        function updateActiveButton(activeBtn) {
+            filterButtons.forEach(btn => {
+                btn.classList.remove('filter-active', 'bg-blue-500', 'text-white');
+                btn.classList.add('border-gray-300', 'hover:bg-gray-100');
+            });
+            activeBtn.classList.add('filter-active', 'bg-blue-500', 'text-white');
+            activeBtn.classList.remove('border-gray-300', 'hover:bg-gray-100');
+        }
+        updateActiveButton(document.querySelector('.filter-btn[data-filter="all"]'));
+        function filterAndSearchRows() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let visibleRowsCount = 0;
+            allRows.forEach(row => {
+                const status = row.dataset.status;
+                const client = row.dataset.client.toLowerCase();
+                const id = row.dataset.id.toLowerCase();
+                const matchesFilter = (currentFilter === 'all' || status === currentFilter);
+                const matchesSearch = (!searchTerm || client.includes(searchTerm) || id.includes(searchTerm));
+                if (matchesFilter && matchesSearch) {
+                    row.style.display = '';
+                    visibleRowsCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            if (visibleRowsCount === 0) {
+                noInvoicesMessageRow.style.display = '';
+                if(tableBody.contains(noInvoicesMessageRow)) tableBody.append(noInvoicesMessageRow);
+            } else {
+                noInvoicesMessageRow.style.display = 'none';
+            }
+            showingCountEl.textContent = visibleRowsCount > 0 ? '1' : '0';
+            toCountEl.textContent = visibleRowsCount;
+            totalCountEl.textContent = allRows.length;
+        }
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                currentFilter = button.dataset.filter;
+                updateActiveButton(button);
+                filterAndSearchRows();
+            });
+        });
+        searchInput.addEventListener('input', filterAndSearchRows);
+        filterAndSearchRows();
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterFromUrl = urlParams.get('filter');
+        if (filterFromUrl) {
+            const targetButton = document.querySelector(`.filter-btn[data-filter="${filterFromUrl}"]`);
+            if (targetButton) {
+                currentFilter = filterFromUrl;
+                updateActiveButton(targetButton);
+                filterAndSearchRows();
+            }
+        }
+        tableBody.addEventListener('click', function(event) {
+            if (event.target.matches('a.text-red-600')) {
+                event.preventDefault();
+                const row = event.target.closest('tr');
+                const invoiceId = row.dataset.id;
+                if (confirm(`Are you sure you want to delete invoice ${invoiceId}? This action cannot be undone.`)) {
+                    console.log(`Simulating delete for invoice: ${invoiceId}`);
+                    row.remove();
+                    const index = allRows.indexOf(row);
+                    if (index > -1) {
+                        allRows.splice(index, 1);
+                    }
+                    filterAndSearchRows();
+                }
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>

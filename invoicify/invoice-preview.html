@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Preview - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF and html2pdf for PDF generation (enabled for download) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <!-- Placeholder for invoice-pdf.js and storage.js -->
+    <script src="notifications.js"></script>
+    <script>
+    // --- Notification Helper ---
+    function showNotification(message, type = 'success', duration = 3000) {
+        if (window.InvoicifyNotifications && typeof window.InvoicifyNotifications.showToast === 'function') {
+            window.InvoicifyNotifications.showToast(message, type, duration);
+        } else if (typeof showToast === 'function') {
+            showToast(message, type, duration);
+        }
+    }
+    </script>
+    <style>
+        :root {
+            --invoice-main-color: #1d4ed8; /* Default blue-700 */
+            --invoice-text-color: #1F2937; /* Default gray-800 */
+        }
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact; /* Chrome, Safari */
+                color-adjust: exact; /* Firefox, Edge */
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+                width: 100%;
+                max-width: 100%;
+            }
+            /* Ensure full width for content within the print area */
+            .invoice-content {
+                width: 100% !important;
+            }
+
+            /* Tailwind's bg-colors might need explicit print rules if not using -webkit-print-color-adjust */
+            .print-bg-gray-50 { background-color: #F9FAFB !important; }
+            .print-text-gray-800 { color: #1F2937 !important; }
+            /* Add other specific print styles as needed */
+        }
+        .invoice-content {
+            max-width: 800px;
+            margin: auto;
+            color: var(--invoice-text-color);
+        }
+        .invoice-main-color {
+            color: var(--invoice-main-color) !important;
+        }
+        .invoice-line {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(90deg, var(--invoice-main-color) 0%, #38bdf8 100%);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Action Bar (No Print) -->
+    <div class="no-print bg-slate-800 text-white py-3 px-6 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <div>
+                <a href="invoices.html" class="text-sm hover:underline">&larr; Back to Invoices</a>
+                <span id="invoiceTitleDisplay" class="ml-4 font-semibold">Invoice INV-2024-001</span>
+            </div>
+            <div class="space-x-3">
+                <button id="printInvoiceBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v6a2 2 0 002 2h1v-4a1 1 0 011-1h8a1 1 0 011 1v4h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+                    </svg>
+                    Print
+                </button>
+                <button id="downloadPdfBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Download PDF
+                </button>
+                <a id="editInvoiceLink" href="invoice-new.html?edit_id=INV-2024-001" class="bg-yellow-500 hover:bg-yellow-600 text-gray-800 px-4 py-2 rounded-md text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                    Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Content (Printable Area) -->
+    <div id="invoicePrintArea" class="print-container p-2 sm:p-4 md:p-8">
+        <div class="invoice-content bg-white shadow-lg rounded-lg p-4 sm:p-8 md:p-12 my-4 sm:my-8">
+            <!-- Invoice Header -->
+            <header class="flex justify-between items-start mb-10">
+                <div>
+                    <!-- Company Logo (Placeholder) -->
+                    <img id="companyLogo" src="https://via.placeholder.com/150x50.png?text=Your+Company+Logo" alt="Company Logo" class="h-12 mb-4">
+                    <h1 id="companyName" class="text-2xl font-bold invoice-main-color">Your Company Name</h1>
+                    <p id="companyAddress" class="text-sm">123 Business Rd, Suite 100<br>City, State, 12345</p>
+                    <p id="companyContact" class="text-sm">email@example.com | (555) 123-4567</p>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-3xl font-semibold invoice-main-color uppercase">Invoice</h2>
+                    <p class="text-gray-600"><strong>Invoice #:</strong> <span id="invoiceNumber">INV-2024-001</span></p>
+                    <p class="text-gray-600"><strong>Issue Date:</strong> <span id="issueDate">2024-07-01</span></p>
+                    <p class="text-gray-600"><strong>Due Date:</strong> <span id="dueDate">2024-07-15</span></p>
+                    <div id="statusBadge" class="mt-2">
+                        <!-- Status will be dynamically set here. E.g. -->
+                        <!-- <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Paid</span> -->
+                    </div>
+                </div>
+            </header>
+
+            <!-- Client Information -->
+            <section class="mb-10">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase mb-1">Bill To:</h3>
+                <p id="clientName" class="text-lg font-medium text-gray-800 print-text-gray-800">Client Company Name</p>
+                <p id="clientAddress" class="text-sm text-gray-500">456 Client Ave, Suite B<br>Client City, CS 67890</p>
+                <p id="clientEmail" class="text-sm text-gray-500">client@email.com</p>
+            </section>
+
+            <!-- Items Table -->
+            <section class="mb-10">
+                <table class="w-full text-left">
+                    <thead class="border-b-2 border-gray-300">
+                        <tr class="text-sm text-gray-600">
+                            <th class="py-2 font-semibold">Description</th>
+                            <th class="py-2 text-center font-semibold">Quantity</th>
+                            <th class="py-2 text-right font-semibold">Unit Price</th>
+                            <th class="py-2 text-right font-semibold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceItemsTableBody">
+                        <!-- Sample Item Row (to be populated by JS) -->
+                        <tr>
+                            <td class="py-3 border-b border-gray-200">Website Design & Development</td>
+                            <td class="py-3 text-center border-b border-gray-200">1</td>
+                            <td class="py-3 text-right border-b border-gray-200">$1,000.00</td>
+                            <td class="py-3 text-right border-b border-gray-200">$1,000.00</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 border-b border-gray-200">SEO Optimization Package</td>
+                            <td class="py-3 text-center border-b border-gray-200">1</td>
+                            <td class="py-3 text-right border-b border-gray-200">$250.00</td>
+                            <td class="py-3 text-right border-b border-gray-200">$250.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Totals Section -->
+            <section class="flex justify-end mb-10">
+                <div class="w-full md:w-1/2 lg:w-1/3 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span id="subtotalAmount" class="font-medium text-gray-800 print-text-gray-800">$1,250.00</span>
+                    </div>
+                    <div id="discountRow" class="flex justify-between">
+                        <span class="text-gray-600">Discount (<span id="discountPercent">0</span>%):</span>
+                        <span id="discountAmount" class="font-medium text-gray-800 print-text-gray-800">-$0.00</span>
+                    </div>
+                    <div id="taxRow" class="flex justify-between">
+                        <span class="text-gray-600">Tax (<span id="taxPercent">0</span>%):</span>
+                        <span id="taxAmount" class="font-medium text-gray-800 print-text-gray-800">+$0.00</span>
+                    </div>
+                    <hr class="my-1 border-gray-300">
+                    <div class="flex justify-between text-lg">
+                        <span class="font-bold invoice-main-color">Total:</span>
+                        <span id="totalAmount" class="font-bold invoice-main-color">$1,250.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notes & Footer -->
+            <footer class="border-t pt-6 text-sm text-gray-600">
+                <div id="notesSection" class="mb-4">
+                    <h4 class="font-semibold mb-1">Notes:</h4>
+                    <p id="invoiceNotes">Thank you for your business! Payment is due within 15 days.</p>
+                </div>
+                <p class="text-center text-xs text-gray-400">
+                    If you have any questions concerning this invoice, please contact <span id="footerContactName">[Your Name]</span> at <span id="footerContactEmail">[Your Email]</span>.
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+    // This script will primarily load data based on URL parameter and prepare for printing/PDF.
+    // Actual data fetching will be from storage.js in a real app.
+
+    // Allow user to change main color and text color via URL params (e.g. ?id=...&color=%231d4ed8&text=%231F2937)
+    function setInvoiceColors() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mainColor = urlParams.get('color');
+        const textColor = urlParams.get('text');
+        if (mainColor) {
+            document.documentElement.style.setProperty('--invoice-main-color', mainColor);
+        }
+        if (textColor) {
+            document.documentElement.style.setProperty('--invoice-text-color', textColor);
+        }
+    }
+    setInvoiceColors();
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const invoiceId = urlParams.get('id');
+        const editInvoiceLink = document.getElementById('editInvoiceLink');
+
+        // Update UI elements with invoice ID
+        document.getElementById('invoiceTitleDisplay').textContent = `Invoice ${invoiceId || 'N/A'}`;
+        document.getElementById('invoiceNumber').textContent = invoiceId || 'N/A';
+        if(editInvoiceLink) editInvoiceLink.href = `invoice-new.html?edit_id=${invoiceId}`;
+
+
+        // --- Sample Data (to be replaced by actual data from storage.js) ---
+        const sampleInvoices = {
+            "INV-2024-001": {
+                company: { name: "Invoicify Co.", address: "123 App Rd, Suite 100\nTech City, TX 75001", contact: "contact@invoicify.co | (555) 555-0011", logo: "https://via.placeholder.com/180x60.png?text=Invoicify+Co." },
+                client: { name: "Tech Solutions Inc.", address: "789 Client St, Suite 202\nInnovation Park, CA 90210", email: "billing@techsolutions.dev" },
+                issueDate: "2024-07-01",
+                dueDate: "2024-07-15",
+                status: "paid", // paid, unpaid, overdue, draft
+                currency: "USD",
+                items: [
+                    { description: "Premium Web Hosting (1 Year)", quantity: 1, price: 300.00 },
+                    { description: "Custom Plugin Development", quantity: 10, price: 75.00 },
+                    { description: "Support Hours (5 hours)", quantity: 5, price: 40.00 }
+                ],
+                discountPercent: 5, // 5%
+                taxPercent: 8.25, // 8.25%
+                notes: "Thank you for your prompt payment! We appreciate your business.",
+                footerContact: { name: "Support Team", email: "support@invoicify.co" }
+            },
+            "INV-2024-002": {
+                company: { name: "My Freelance Biz", address: "PO Box 101\nCreative Town, CT 06001", contact: "me@myfreelance.biz | (555) 123-9876", logo: "https://via.placeholder.com/150x50.png?text=My+Freelance+Biz" },
+                client: { name: "Creative Designs LLC", address: "1 Art Way\nDesign District, FL 33000", email: "accounts@creativedesigns.com" },
+                issueDate: "2024-07-05",
+                dueDate: "2024-07-20",
+                status: "unpaid",
+                currency: "USD",
+                items: [
+                    { description: "Logo Design Package", quantity: 1, price: 650.00 },
+                    { description: "Business Card Design (250ct)", quantity: 1, price: 150.50 }
+                ],
+                discountPercent: 0,
+                taxPercent: 0,
+                notes: "Payment due upon receipt. Late fees may apply after 30 days.",
+                footerContact: { name: "Jane Doe", email: "jane@myfreelance.biz" }
+            },
+             "DRAFT-001": { // From invoice-new.html example
+                company: { name: "Invoicify Draft Services", address: "123 Draft Rd\nWorkInProgress City, WIP 00000", contact: "drafts@invoicify.co", logo: "https://via.placeholder.com/150x50.png?text=Draft+Mode" },
+                client: { name: "New Client Prospect", address: "Prospect Address\nLeadsville, LD 12345", email: "prospect@example.com" },
+                issueDate: "2024-07-18",
+                dueDate: "-", // Drafts might not have due dates or specific ones
+                status: "draft",
+                currency: "USD",
+                items: [
+                    { description: "Initial Consultation", quantity: 1, price: 150.00 },
+                    { description: "Logo Design Sketch", quantity: 1, price: 350.00 }
+                ],
+                discountPercent: 0,
+                taxPercent: 0,
+                notes: "This is a draft invoice for initial discussion. Details subject to change.",
+                footerContact: { name: "Sales Team", email: "sales@invoicify.co" }
+            }
+            // Add more sample invoices as needed, matching IDs from invoices.html
+        };
+
+        let currentInvoiceData = sampleInvoices[invoiceId] || null;
+        // Try to load from sessionStorage if not found in sample data
+        if (!currentInvoiceData) {
+            const sessionData = sessionStorage.getItem('invoicePreview_' + invoiceId);
+            if (sessionData) {
+                try {
+                    currentInvoiceData = JSON.parse(sessionData);
+                } catch (e) {
+                    currentInvoiceData = null;
+                }
+            }
+        }
+        // If still not found, show a basic message or default.
+        if (!currentInvoiceData) {
+            console.error(`Invoice with ID ${invoiceId} not found in sample data or sessionStorage.`);
+            document.getElementById('invoiceItemsTableBody').innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500">Invoice data for ID '${invoiceId}' not found.</td></tr>`;
+            document.getElementById('companyName').textContent = "Error";
+            ['clientName', 'subtotalAmount', 'totalAmount', 'invoiceNotes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = "Data not available";
+            });
+            document.getElementById('printInvoiceBtn').disabled = true;
+            document.getElementById('downloadPdfBtn').disabled = true;
+            if(editInvoiceLink) editInvoiceLink.classList.add('hidden');
+            return;
+        }
+
+
+        // --- Populate Invoice Details ---
+        // Company Details
+        if (currentInvoiceData.company) {
+            document.getElementById('companyLogo').src = currentInvoiceData.company.logo || 'https://via.placeholder.com/150x50.png?text=No+Logo';
+            document.getElementById('companyName').textContent = currentInvoiceData.company.name;
+            document.getElementById('companyAddress').innerHTML = currentInvoiceData.company.address.replace(/\n/g, '<br>');
+            document.getElementById('companyContact').textContent = currentInvoiceData.company.contact;
+        }
+
+        // Invoice Dates & Status
+        document.getElementById('issueDate').textContent = currentInvoiceData.issueDate;
+        document.getElementById('dueDate').textContent = currentInvoiceData.dueDate;
+        
+        const statusBadge = document.getElementById('statusBadge');
+        let statusClass = '';
+        let statusText = currentInvoiceData.status.charAt(0).toUpperCase() + currentInvoiceData.status.slice(1);
+        switch (currentInvoiceData.status) {
+            case 'paid': statusClass = 'bg-green-100 text-green-800'; break;
+            case 'unpaid': statusClass = 'bg-blue-100 text-blue-800'; break;
+            case 'overdue': statusClass = 'bg-red-100 text-red-800'; break;
+            case 'draft': statusClass = 'bg-gray-200 text-gray-700'; break;
+            default: statusClass = 'bg-gray-100 text-gray-800';
+        }
+        statusBadge.innerHTML = `<span class="px-3 py-1 text-sm font-semibold rounded-full ${statusClass}">${statusText}</span>`;
+        if(currentInvoiceData.status === 'draft' && editInvoiceLink) {
+             editInvoiceLink.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg> Continue Editing`;
+        }
+
+
+        // Client Details
+        if (currentInvoiceData.client) {
+            document.getElementById('clientName').textContent = currentInvoiceData.client.name;
+            document.getElementById('clientAddress').innerHTML = currentInvoiceData.client.address.replace(/\n/g, '<br>');
+            document.getElementById('clientEmail').textContent = currentInvoiceData.client.email;
+        }
+
+        // Invoice Items
+        const itemsTableBody = document.getElementById('invoiceItemsTableBody');
+        itemsTableBody.innerHTML = ''; // Clear sample static rows
+        let subtotal = 0;
+        currentInvoiceData.items.forEach(item => {
+            const itemTotal = item.quantity * item.price;
+            subtotal += itemTotal;
+            const row = `
+                <tr>
+                    <td class="py-3 border-b border-gray-200">${item.description}</td>
+                    <td class="py-3 text-center border-b border-gray-200">${item.quantity}</td>
+                    <td class="py-3 text-right border-b border-gray-200">${formatCurrency(item.price, currentInvoiceData.currency)}</td>
+                    <td class="py-3 text-right border-b border-gray-200">${formatCurrency(itemTotal, currentInvoiceData.currency)}</td>
+                </tr>
+            `;
+            itemsTableBody.insertAdjacentHTML('beforeend', row);
+        });
+
+        // Totals
+        const discountPercent = currentInvoiceData.discountPercent || 0;
+        const taxPercent = currentInvoiceData.taxPercent || 0;
+        const discountAmount = subtotal * (discountPercent / 100);
+        const subtotalAfterDiscount = subtotal - discountAmount;
+        const taxAmount = subtotalAfterDiscount * (taxPercent / 100);
+        const total = subtotalAfterDiscount + taxAmount;
+
+        document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal, currentInvoiceData.currency);
+        
+        document.getElementById('discountPercent').textContent = discountPercent;
+        document.getElementById('discountAmount').textContent = `-${formatCurrency(discountAmount, currentInvoiceData.currency)}`;
+        if(discountPercent === 0) document.getElementById('discountRow').style.display = 'none'; else document.getElementById('discountRow').style.display = 'flex';
+
+        document.getElementById('taxPercent').textContent = taxPercent;
+        document.getElementById('taxAmount').textContent = `+${formatCurrency(taxAmount, currentInvoiceData.currency)}`;
+         if(taxPercent === 0) document.getElementById('taxRow').style.display = 'none'; else document.getElementById('taxRow').style.display = 'flex';
+
+        document.getElementById('totalAmount').textContent = formatCurrency(total, currentInvoiceData.currency);
+
+        // Notes and Footer
+        document.getElementById('invoiceNotes').textContent = currentInvoiceData.notes || 'No additional notes.';
+        if (currentInvoiceData.footerContact) {
+            document.getElementById('footerContactName').textContent = currentInvoiceData.footerContact.name;
+            document.getElementById('footerContactEmail').textContent = currentInvoiceData.footerContact.email;
+        }
+
+        // --- Helper to format currency ---
+        function formatCurrency(amount, currencyCode = 'USD') {
+             try {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(amount);
+            } catch (e) {
+                return `${currencyCode} ${amount.toFixed(2)}`;
+            }
+        }
+
+        // --- Print Functionality ---
+        document.getElementById('printInvoiceBtn').addEventListener('click', () => {
+            window.print();
+        });
+
+        // --- PDF Download Functionality (Placeholder using html2pdf.js if included) ---
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            // This requires html2pdf.js to be included in the <head>
+            const element = document.getElementById('invoicePrintArea');
+            const opt = {
+              margin:       0.5, // inches
+              filename:     `Invoice-${invoiceId || 'document'}.pdf`,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true }, // useCORS if images are from external source
+              jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+            showNotification('Invoice PDF downloaded!', 'success');
+        });
+
+    });
+    </script>
+
+</body>
+</html>

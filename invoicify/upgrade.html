@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Your Plan - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Styles for modal appearance, can be part of main.css or global styles */
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-container {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .modal-hidden .modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-hidden .modal-container {
+            opacity: 0;
+            transform: scale(0.95) translateY(-20px);
+            pointer-events: none;
+        }
+        /* Styling for the selected plan */
+        .plan-card.selected {
+            border-color: #10B981; /* emerald-500 */
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5); /* Ring effect */
+        }
+    </style>
+</head>
+<body class="bg-gray-200"> <!-- Body background for context if modal is not full screen -->
+
+    <!-- 
+        This page can be used as a full paywall page or its content adapted for a modal.
+        For this example, it's structured as a page that could be loaded,
+        but the JS includes logic to show/hide it like a modal if triggered from another page.
+    -->
+
+    <div id="upgradeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-hidden">
+        <!-- Overlay -->
+        <div class="modal-overlay fixed inset-0 bg-black bg-opacity-60"></div>
+
+        <!-- Modal Content -->
+        <div class="modal-container bg-white w-full max-w-3xl rounded-xl shadow-2xl p-8 relative transform opacity-100 scale-100">
+            <!-- Close Button -->
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="text-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-yellow-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" /> <!-- Checkmark inside lock -->
+                </svg>
+                <h2 class="text-3xl font-bold text-gray-800">Unlock Premium Features!</h2>
+                <p class="text-gray-600 mt-2">You're currently on the <strong id="currentPlanName" class="font-semibold">Free Plan</strong>. Upgrade to access more.</p>
+                <p id="featureAttempted" class="text-sm text-gray-500 mt-1 hidden">You tried to use: <span class="font-medium"></span></p>
+            </div>
+
+            <!-- Plan Selection -->
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <!-- Pro Plan Card -->
+                <div id="selectProPlan" data-plan="pro" class="plan-card border-2 border-gray-200 p-6 rounded-lg hover:border-indigo-500 cursor-pointer transition-all duration-200">
+                    <h3 class="text-xl font-semibold text-indigo-600 mb-1">Pro Plan</h3>
+                    <p class="text-3xl font-bold text-gray-800 mb-1">$15 <span class="text-base font-normal text-gray-500">/ month</span></p>
+                    <ul class="text-sm text-gray-600 space-y-1 mt-3">
+                        <li><span class="text-green-500 mr-1">&#10003;</span> Unlimited Invoices</li>
+                        <li><span class="text-green-500 mr-1">&#10003;</span> Invoice Customization</li>
+                        <li><span class="text-green-500 mr-1">&#10003;</span> Automated Reminders</li>
+                        <li><span class="text-green-500 mr-1">&#10003;</span> Advanced Reporting</li>
+                    </ul>
+                </div>
+
+                <!-- Enterprise Plan Card -->
+                <div id="selectEnterprisePlan" data-plan="enterprise" class="plan-card border-2 border-gray-200 p-6 rounded-lg hover:border-purple-500 cursor-pointer transition-all duration-200">
+                    <h3 class="text-xl font-semibold text-purple-600 mb-1">Enterprise Plan</h3>
+                     <p class="text-3xl font-bold text-gray-800 mb-1">$49 <span class="text-base font-normal text-gray-500">/ month</span></p>
+                    <ul class="text-sm text-gray-600 space-y-1 mt-3">
+                        <li><span class="text-green-500 mr-1">&#10003;</span> All Pro Features</li>
+                        <li><span class="text-green-500 mr-1">&#10003;</span> Team Collaboration</li>
+                        <li><span class="text-green-500 mr-1">&#10003;</span> Dedicated Support</li>
+                        <li><span class="text-green-500 mr-1">&#10003;</span> API Access</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <input type="hidden" id="selectedPlanInput" name="selectedPlan" value="">
+
+            <!-- Payment Buttons (Dummy) -->
+            <div class="text-center space-y-3">
+                <h4 class="text-lg font-medium text-gray-700 mb-3">Proceed to Payment</h4>
+                 <p id="paymentError" class="text-red-500 text-sm mb-2 hidden"></p>
+                <button id="momoPayBtn" data-payment="momo" class="w-full max-w-xs bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"> <!-- Mobile phone icon -->
+                        <path fill-rule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zm3 14a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
+                    Pay with Mobile Money
+                </button>
+                <button id="cardPayBtn" data-payment="card" class="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center mx-auto">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"> <!-- Credit card icon -->
+                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zm-7 4a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
+                    Pay with Card / Bank
+                </button>
+                 <p class="text-xs text-gray-500 mt-4">This is a simulated payment process.</p>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="pricing.html" class="text-sm text-indigo-600 hover:underline">View Full Pricing Details & All Features &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Example button on another page to trigger this modal -->
+    <!-- 
+    <button id="triggerUpgradeModal" class="m-10 p-3 bg-red-500 text-white rounded">
+        Attempt Premium Feature (Show Modal)
+    </button> 
+    -->
+
+    <script>
+        const upgradeModal = document.getElementById('upgradeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const overlay = upgradeModal.querySelector('.modal-overlay');
+        
+        const currentPlanNameEl = document.getElementById('currentPlanName');
+        const featureAttemptedEl = document.getElementById('featureAttempted');
+        const featureAttemptedTextEl = featureAttemptedEl.querySelector('span');
+
+        const planCards = document.querySelectorAll('.plan-card');
+        const selectedPlanInput = document.getElementById('selectedPlanInput');
+        const paymentErrorEl = document.getElementById('paymentError');
+
+
+        function showUpgradeModal(currentPlan = 'Free', featureName = null) {
+            upgradeModal.classList.remove('modal-hidden');
+            currentPlanNameEl.textContent = currentPlan;
+            if (featureName) {
+                featureAttemptedTextEl.textContent = featureName;
+                featureAttemptedEl.classList.remove('hidden');
+            } else {
+                featureAttemptedEl.classList.add('hidden');
+            }
+            // Reset selection
+            planCards.forEach(card => card.classList.remove('selected'));
+            selectedPlanInput.value = '';
+            paymentErrorEl.classList.add('hidden');
+        }
+
+        function hideUpgradeModal() {
+            upgradeModal.classList.add('modal-hidden');
+        }
+
+        closeModalBtn.addEventListener('click', hideUpgradeModal);
+        overlay.addEventListener('click', hideUpgradeModal); // Close on overlay click
+
+        // Handle Escape key to close modal
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !upgradeModal.classList.contains('modal-hidden')) {
+                hideUpgradeModal();
+            }
+        });
+
+        // Plan selection logic
+        planCards.forEach(card => {
+            card.addEventListener('click', () => {
+                planCards.forEach(c => c.classList.remove('selected', 'border-emerald-500')); // emerald-500 for selected
+                card.classList.add('selected', 'border-emerald-500');
+                selectedPlanInput.value = card.dataset.plan;
+                paymentErrorEl.classList.add('hidden'); // Clear error on new selection
+            });
+        });
+
+        // Dummy Payment Buttons
+        const paymentButtons = [document.getElementById('momoPayBtn'), document.getElementById('cardPayBtn')];
+        paymentButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedPlan = selectedPlanInput.value;
+                if (!selectedPlan) {
+                    paymentErrorEl.textContent = 'Please select a plan to upgrade to.';
+                    paymentErrorEl.classList.remove('hidden');
+                    return;
+                }
+                paymentErrorEl.classList.add('hidden');
+                
+                // Simulate payment processing
+                button.disabled = true;
+                button.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
+
+                setTimeout(() => {
+                    // Simulate success
+                    alert(`Successfully upgraded to ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Plan via ${button.dataset.payment}! (Simulated)`);
+                    // In a real app, update user's plan in storage/backend and redirect or update UI.
+                    hideUpgradeModal();
+                    
+                    // Reset button
+                    button.disabled = false;
+                    // Restore original button text (this is a bit manual, might store it)
+                    if(button.dataset.payment === 'momo') button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zm3 14a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg> Pay with Mobile Money`;
+                    else button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zm-7 4a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg> Pay with Card / Bank`;
+
+                }, 2500);
+            });
+        });
+
+
+        // --- How to trigger this modal from another page: ---
+        // 1. Add a button on the other page:
+        //    <button id="triggerUpgradeModalBtn" data-feature="Invoice Customization">Use Premium Feature</button>
+        // 2. Add JS on that page:
+        //    document.getElementById('triggerUpgradeModalBtn').addEventListener('click', function() {
+        //        const feature = this.dataset.feature;
+        //        // Store data for modal or pass via URL query params to upgrade.html
+        //        sessionStorage.setItem('upgradeTrigger', JSON.stringify({ currentPlan: 'Free', featureName: feature }));
+        //        window.location.href = 'upgrade.html'; // Or open as a true JS modal if upgrade.html's content is part of the current page.
+        //    });
+        // 3. On upgrade.html (this page), check for this data on load:
+        
+        const upgradeTriggerData = sessionStorage.getItem('upgradeTrigger');
+        if (upgradeTriggerData) {
+            try {
+                const data = JSON.parse(upgradeTriggerData);
+                showUpgradeModal(data.currentPlan, data.featureName);
+                sessionStorage.removeItem('upgradeTrigger'); // Clear after use
+            } catch (e) {
+                console.error("Error parsing upgrade trigger data:", e);
+                showUpgradeModal(); // Show default modal
+            }
+        } else {
+            // If opened directly or no trigger data, show default modal for demo purposes
+            // In a real app, this page might not be directly navigable or would show a generic upgrade message.
+            // For now, let's auto-show it for testing if not triggered.
+            // showUpgradeModal(); // Comment this out if you don't want it to auto-show when navigating directly.
+        }
+
+        // For direct testing of the modal without session storage:
+        // const testTriggerBtn = document.getElementById('triggerUpgradeModal');
+        // if (testTriggerBtn) {
+        //     testTriggerBtn.addEventListener('click', () => {
+        //         showUpgradeModal('Free', 'Unlimited Invoices');
+        //     });
+        // }
+
+    </script>
+
+</body>
+</html>

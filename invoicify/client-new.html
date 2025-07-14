@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Client - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Placeholder for main.js and storage.js -->
+    <!-- <script src="main.js" defer></script> -->
+    <!-- <script src="storage.js" defer></script> -->
+    <style>
+        .form-input.error, .form-textarea.error {
+            border-color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+        /* Basic styling for tags input if implemented simply */
+        .tags-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            border: 1px solid #D1D5DB; /* border-gray-300 */
+            border-radius: 0.375rem; /* rounded-lg */
+            padding: 0.25rem;
+        }
+        .tag-item {
+            background-color: #DBEAFE; /* bg-blue-100 */
+            color: #1E40AF; /* text-blue-800 */
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem; /* rounded-md */
+            margin: 0.125rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tag-item button {
+            margin-left: 0.25rem;
+            color: #93C5FD; /* text-blue-300 */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding:0;
+        }
+         .tag-item button:hover {
+            color: #1E40AF; /* text-blue-800 */
+         }
+        .tags-input-container input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar (dashboard mobile hamburger pattern) -->
+    <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 min-h-screen p-4 space-y-6 transition-transform duration-300 ease-in-out border-r border-gray-200 shadow-md fixed left-0 top-0 h-full z-40 -translate-x-full md:translate-x-0">
+        <button id="sidebarCollapse" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Collapse Sidebar" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="text-center">
+            <a href="index.html" class="text-2xl font-semibold text-white">Invoicify</a>
+        </div>
+        <nav class="space-y-2">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="invoices.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <span>Invoices</span>
+            </a>
+            <a href="clients.html" class="flex items-center space-x-3 px-4 py-2 rounded-md bg-slate-700 text-white"> <!-- Active page -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span>Clients</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.835 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.835 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.835-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+         <div class="mt-auto pt-6 border-t border-slate-700">
+            <a href="index.html" class="flex items-center space-x-3 px-4 py-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Hamburger (Expand) Button, mobile only -->
+    <button id="sidebarExpand" class="fixed top-4 left-4 z-50 bg-white border border-gray-200 shadow p-2 rounded-full text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Expand Sidebar" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col md:ml-64 ml-0 transition-all duration-300">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30">
+            <button id="sidebarToggle" class="text-gray-600 hover:text-gray-800 md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            </button>
+            <h1 id="pageTitle" class="text-xl font-semibold text-gray-700">Clients</h1>
+             <div class="flex items-center space-x-4">
+                <!-- User Profile/Notifications (same as dashboard) -->
+                 <button class="relative text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                </button>
+                <div class="relative">
+                    <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User+Name&background=random&color=fff" alt="User Avatar">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-6">
+            <form id="clientForm" class="bg-white p-8 rounded-lg shadow-md max-w-xl mx-auto space-y-6">
+                <!-- Contact Information -->
+                <fieldset>
+                    <legend class="text-lg font-medium text-gray-900 mb-3">Contact Information</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="clientName" class="block text-sm font-medium text-gray-700 mb-1">Full Name / Contact Person <span class="text-red-500">*</span></label>
+                            <input type="text" id="clientName" name="clientName" required
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <p class="error-message mt-1" id="clientNameError"></p>
+                        </div>
+                        <div>
+                            <label for="clientEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address <span class="text-red-500">*</span></label>
+                            <input type="email" id="clientEmail" name="clientEmail" required
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <p class="error-message mt-1" id="clientEmailError"></p>
+                        </div>
+                        <div>
+                            <label for="clientPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                            <input type="tel" id="clientPhone" name="clientPhone"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Company Information -->
+                <fieldset>
+                    <legend class="text-lg font-medium text-gray-900 mb-3">Company Information (Optional)</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="companyName" class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                            <input type="text" id="companyName" name="companyName"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="companyIndustry" class="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+                            <input type="text" id="companyIndustry" name="companyIndustry" placeholder="e.g., Technology, Retail, Healthcare"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                         <div class="md:col-span-2">
+                            <label for="companyAddress" class="block text-sm font-medium text-gray-700 mb-1">Company Address</label>
+                            <textarea id="companyAddress" name="companyAddress" rows="3"
+                                      class="form-textarea w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                </fieldset>
+                
+                <!-- Additional Information -->
+                <fieldset>
+                    <legend class="text-lg font-medium text-gray-900 mb-3">Additional Information</legend>
+                     <div>
+                        <label for="clientTags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                        <div id="tagsContainer" class="tags-input-container focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                            <!-- Tags will be added here by JS -->
+                            <input type="text" id="tagInput" placeholder="Type a tag and press Enter or Comma"
+                                   class="flex-grow">
+                        </div>
+                        <input type="hidden" name="clientTags" id="hiddenTagsInput"> <!-- Hidden input to store tags for form submission -->
+                        <p class="text-xs text-gray-500 mt-1">Separate tags with commas or press Enter.</p>
+                    </div>
+                    <div class="mt-4">
+                        <label for="clientNotes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea id="clientNotes" name="clientNotes" rows="4" placeholder="Any specific notes about this client..."
+                                  class="form-textarea w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </fieldset>
+
+                <!-- Form Actions -->
+                <div class="pt-5">
+                    <div class="flex justify-end items-center space-x-3">
+                        <p id="formMessage" class="text-sm mr-auto"></p>
+                        <a href="clients.html" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </a>
+                        <button type="submit" id="saveClientBtn"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Save Client
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Sidebar Hamburger/Collapse Logic (dashboard pattern) ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarExpand = document.getElementById('sidebarExpand');
+
+        function updateSidebarUI() {
+            const isMobile = window.innerWidth < 768;
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (isMobile) {
+                if (isOpen) {
+                    sidebarCollapse.classList.remove('hidden');
+                    sidebarExpand.classList.add('hidden');
+                } else {
+                    sidebarCollapse.classList.add('hidden');
+                    sidebarExpand.classList.remove('hidden');
+                }
+            } else {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.add('hidden');
+            }
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('-translate-x-0');
+            updateSidebarUI();
+        }
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('-translate-x-0');
+            updateSidebarUI();
+        }
+        if (sidebarCollapse) sidebarCollapse.addEventListener('click', closeSidebar);
+        if (sidebarExpand) sidebarExpand.addEventListener('click', openSidebar);
+
+        function handleSidebarState() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('-translate-x-0');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('-translate-x-0');
+            }
+            updateSidebarUI();
+        }
+        window.addEventListener('resize', handleSidebarState);
+        handleSidebarState();
+
+        // --- Tag Input Functionality ---
+        const tagsContainer = document.getElementById('tagsContainer');
+        const tagInput = document.getElementById('tagInput');
+        const hiddenTagsInput = document.getElementById('hiddenTagsInput');
+        let tags = [];
+
+        function renderTags() {
+            // Clear existing tag elements except the input itself
+            tagsContainer.querySelectorAll('.tag-item').forEach(tagEl => tagEl.remove());
+            
+            tags.forEach(tagText => {
+                const tagElement = document.createElement('span');
+                tagElement.classList.add('tag-item');
+                tagElement.textContent = tagText;
+                
+                const removeButton = document.createElement('button');
+                removeButton.innerHTML = '&times;'; // 'x' character
+                removeButton.addEventListener('click', () => {
+                    tags = tags.filter(t => t !== tagText);
+                    renderTags();
+                    updateHiddenTagsInput();
+                });
+                
+                tagElement.appendChild(removeButton);
+                tagsContainer.insertBefore(tagElement, tagInput);
+            });
+            updateHiddenTagsInput();
+        }
+        
+        function updateHiddenTagsInput() {
+            hiddenTagsInput.value = tags.join(',');
+        }
+
+        tagInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ',') {
+                event.preventDefault();
+                const newTag = tagInput.value.trim();
+                if (newTag && !tags.includes(newTag)) {
+                    tags.push(newTag);
+                    renderTags();
+                }
+                tagInput.value = '';
+            }
+        });
+        tagInput.addEventListener('blur', function() { // Add tag on blur if input has content
+             const newTag = tagInput.value.trim();
+             if (newTag && !tags.includes(newTag)) {
+                tags.push(newTag);
+                renderTags();
+            }
+            tagInput.value = '';
+        });
+
+
+        // --- Form Validation and Submission ---
+        const clientForm = document.getElementById('clientForm');
+        const clientNameInput = document.getElementById('clientName');
+        const clientEmailInput = document.getElementById('clientEmail');
+        const clientNameError = document.getElementById('clientNameError');
+        const clientEmailError = document.getElementById('clientEmailError');
+        const formMessage = document.getElementById('formMessage');
+        const pageTitle = document.getElementById('pageTitle');
+        const saveClientBtn = document.getElementById('saveClientBtn');
+
+
+        function validateForm() {
+            let isValid = true;
+            // Name validation
+            if (!clientNameInput.value.trim()) {
+                clientNameError.textContent = 'Client name is required.';
+                clientNameInput.classList.add('error');
+                isValid = false;
+            } else {
+                clientNameError.textContent = '';
+                clientNameInput.classList.remove('error');
+            }
+
+            // Email validation
+            const emailValue = clientEmailInput.value.trim();
+            if (!emailValue) {
+                clientEmailError.textContent = 'Email is required.';
+                clientEmailInput.classList.add('error');
+                isValid = false;
+            } else {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(emailValue)) {
+                    clientEmailError.textContent = 'Please enter a valid email address.';
+                    clientEmailInput.classList.add('error');
+                    isValid = false;
+                } else {
+                    clientEmailError.textContent = '';
+                    clientEmailInput.classList.remove('error');
+                }
+            }
+            return isValid;
+        }
+
+        clientForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            formMessage.textContent = '';
+            formMessage.className = 'text-sm mr-auto';
+
+            if (validateForm()) {
+                const formData = new FormData(clientForm);
+                const clientData = Object.fromEntries(formData.entries());
+                clientData.tags = tags; // Add processed tags
+                clientData.id = currentEditId || `client_${Date.now()}`; // Use existing ID or generate new
+
+                // TODO: Integrate with storage.js to save/update client data
+                console.log("Client Data:", clientData);
+
+                formMessage.textContent = currentEditId ? 'Client updated successfully!' : 'Client added successfully!';
+                formMessage.classList.add(currentEditId ? 'text-blue-600' : 'text-green-600');
+                
+                if (!currentEditId) { // If adding new, reset form for potentially adding another
+                    clientForm.reset();
+                    tags = [];
+                    renderTags();
+                }
+
+                setTimeout(() => {
+                    window.location.href = 'clients.html'; // Redirect to clients list
+                }, 1500);
+
+            } else {
+                formMessage.textContent = 'Please correct the errors in the form.';
+                formMessage.classList.add('text-red-600');
+            }
+        });
+
+        // --- Edit Mode ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentEditId = urlParams.get('edit_id');
+
+        if (currentEditId) {
+            pageTitle.textContent = 'Edit Client';
+            saveClientBtn.textContent = 'Update Client';
+            // TODO: Fetch client data from storage.js using currentEditId
+            // For demo, pre-fill with sample data if ID matches one from clients.html
+            const sampleClientsData = {
+                "client1_id": { clientName: "Tech Solutions Inc. (John Doe)", clientEmail: "billing@techsolutions.dev", clientPhone: "(555) 123-4567", companyName: "Tech Solutions Inc.", companyIndustry: "Technology", companyAddress: "789 Client St, Suite 202\nInnovation Park, CA 90210", clientTags: ["Corporate", "Priority"], clientNotes: "Long-term client, very responsive." },
+                "client2_id": { clientName: "Creative Designs LLC (Jane Smith)", clientEmail: "accounts@creativedesigns.com", clientPhone: "(555) 987-6543", companyName: "Creative Designs LLC", companyIndustry: "Design", companyAddress: "1 Art Way\nDesign District, FL 33000", clientTags: ["SMB"], clientNotes: "Needs quick turnarounds." }
+            };
+            const dataToEdit = sampleClientsData[currentEditId];
+            if (dataToEdit) {
+                clientNameInput.value = dataToEdit.clientName.split('(')[0].trim(); // Extract name before (Contact: ...)
+                clientEmailInput.value = dataToEdit.clientEmail;
+                document.getElementById('clientPhone').value = dataToEdit.clientPhone || '';
+                document.getElementById('companyName').value = dataToEdit.companyName || '';
+                document.getElementById('companyIndustry').value = dataToEdit.companyIndustry || '';
+                document.getElementById('companyAddress').value = dataToEdit.companyAddress || '';
+                document.getElementById('clientNotes').value = dataToEdit.clientNotes || '';
+                if (dataToEdit.clientTags && Array.isArray(dataToEdit.clientTags)) {
+                    tags = [...dataToEdit.clientTags];
+                    renderTags();
+                }
+            } else {
+                console.warn(`Edit mode for ${currentEditId}, but no sample data to load. Implement fetching from storage.js.`);
+                formMessage.textContent = 'Error: Client data not found for editing.';
+                formMessage.classList.add('text-red-600');
+                saveClientBtn.disabled = true;
+            }
+        }
+        renderTags(); // Initial render for tags (empty if new, populated if editing)
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Placeholder for main.js and storage.js -->
+    <!-- <script src="main.js" defer></script> -->
+    <!-- <script src="storage.js" defer></script> -->
+    <style>
+        .table-cell-truncate {
+            max-width: 150px; /* Adjust as needed */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar (matches dashboard.html/settings.html) -->
+    <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 min-h-screen p-4 space-y-6 transition-transform duration-300 ease-in-out border-r border-gray-200 shadow-md fixed left-0 top-0 h-full" style="z-index: 40;">
+        <button id="sidebarCollapse" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Collapse Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="text-center">
+            <a href="index.html" class="text-2xl font-semibold text-white">Invoicify</a>
+        </div>
+        <nav class="space-y-2">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="invoices.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <span>Invoices</span>
+            </a>
+            <a href="clients.html" class="flex items-center space-x-3 px-4 py-2 rounded-md bg-slate-700 text-white"> <!-- Active page -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span>Clients</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.835 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.835 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.835-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+         <div class="mt-auto pt-6 border-t border-slate-700">
+            <a href="index.html" class="flex items-center space-x-3 px-4 py-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col relative md:ml-64 ml-0 transition-all duration-300">
+        <button id="sidebarExpand" class="fixed top-4 left-4 z-30 bg-white border border-gray-200 shadow p-2 rounded-full text-gray-400 hover:text-blue-600 focus:outline-none md:hidden" title="Expand Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sticky top-0 z-20">
+            <h1 class="text-xl font-semibold text-gray-700">Manage Clients</h1>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <a href="client-new.html" id="addNewClientBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                    <span>New Client</span>
+                </a>
+                <button class="relative text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                </button>
+                <div class="relative">
+                    <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User+Name&background=random&color=fff" alt="User Avatar">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-6 space-y-6">
+            <!-- Search and Filter Bar -->
+            <section class="bg-white p-4 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 md:space-x-4">
+                    <div class="relative w-full md:w-auto md:flex-grow">
+                        <input type="text" id="searchClientsInput" placeholder="Search clients (Name, Email, Company)"
+                               class="w-full md:max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none md:hidden"> <!-- Search icon for mobile -->
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="sortClients" class="text-sm font-medium text-gray-600">Sort by:</label>
+                        <select id="sortClients" class="form-select px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="company_asc">Company (A-Z)</option>
+                            <option value="date_added_newest">Date Added (Newest)</option>
+                            <option value="date_added_oldest">Date Added (Oldest)</option>
+                        </select>
+                        <!-- More filter options like "Tags" could be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients Table -->
+            <section class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="responsive-table overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200" id="clientsTable">
+        <style>
+        /* Responsive tweaks for clients table */
+        @media (max-width: 640px) {
+            .responsive-table table {
+                font-size: 0.95rem;
+            }
+            .responsive-table th, .responsive-table td {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                white-space: nowrap;
+            }
+            .responsive-table {
+                margin-left: -1rem;
+                margin-right: -1rem;
+            }
+            .flex.md\:flex-row {
+                flex-direction: column !important;
+            }
+        }
+        </style>
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added On</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="clientsTableBody">
+                            <!-- Sample Data Rows (to be replaced by JS from storage.js) -->
+                            <tr data-client-id="client1_id" data-name="Tech Solutions Inc." data-email="billing@techsolutions.dev" data-company="Tech Solutions Inc." data-date-added="2024-01-15">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Tech Solutions Inc.</div>
+                                    <div class="text-xs text-gray-500">(Contact: John Doe)</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap table-cell-truncate" title="billing@techsolutions.dev"><a href="mailto:billing@techsolutions.dev" class="text-blue-600 hover:underline">billing@techsolutions.dev</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 table-cell-truncate" title="Tech Solutions Inc.">Tech Solutions Inc.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(555) 123-4567</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 mr-1">Corporate</span>
+                                    <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Priority</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="client-new.html?edit_id=client1_id" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <button data-action="archive" class="text-yellow-600 hover:text-yellow-900">Archive</button>
+                                    <button data-action="delete" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                            <tr data-client-id="client2_id" data-name="Creative Designs LLC" data-email="accounts@creativedesigns.com" data-company="Creative Designs LLC" data-date-added="2024-03-22">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Creative Designs LLC</div>
+                                    <div class="text-xs text-gray-500">(Contact: Jane Smith)</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap table-cell-truncate" title="accounts@creativedesigns.com"><a href="mailto:accounts@creativedesigns.com" class="text-blue-600 hover:underline">accounts@creativedesigns.com</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 table-cell-truncate" title="Creative Designs LLC">Creative Designs LLC</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(555) 987-6543</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">SMB</span>
+                                </td>
+                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-03-22</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="client-new.html?edit_id=client2_id" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <button data-action="archive" class="text-yellow-600 hover:text-yellow-900">Archive</button>
+                                    <button data-action="delete" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                             <tr data-client-id="client3_id" data-name="WebWorks Co." data-email="info@webworks.co" data-company="WebWorks Co." data-date-added="2023-11-05">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">WebWorks Co.</div>
+                                    <div class="text-xs text-gray-500">(Contact: Peter Pan)</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap table-cell-truncate" title="info@webworks.co"><a href="mailto:info@webworks.co" class="text-blue-600 hover:underline">info@webworks.co</a></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 table-cell-truncate" title="WebWorks Co.">WebWorks Co.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">(555) 111-2222</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 mr-1">Corporate</span>
+                                </td>
+                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2023-11-05</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="client-new.html?edit_id=client3_id" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <button data-action="archive" class="text-yellow-600 hover:text-yellow-900">Archive</button>
+                                    <button data-action="delete" class="text-red-600 hover:text-red-900">Delete</button>
+                                </td>
+                            </tr>
+                            <!-- No Clients Message (hidden by default) -->
+                            <tr id="noClientsMessageRow" class="hidden">
+                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <p class="mt-2 text-lg">No clients found.</p>
+                                    <p class="mt-1 text-sm">Try adjusting your search or <a href="client-new.html" class="text-blue-500 hover:underline">add a new client</a>.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination (Placeholder) -->
+                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    <p class="text-sm text-gray-600">Showing <span id="clientsShowingCount">1</span> to <span id="clientsToCount">3</span> of <span id="clientsTotalCount">3</span> results</p>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50">Next</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    // --- Sidebar Collapse/Expand (matches dashboard.html/settings.html) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarExpand = document.getElementById('sidebarExpand');
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('-translate-x-0');
+            sidebarCollapse.classList.add('hidden');
+            sidebarExpand.classList.remove('hidden');
+        }
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('-translate-x-0');
+            sidebarCollapse.classList.remove('hidden');
+            sidebarExpand.classList.add('hidden');
+        }
+        if (sidebarCollapse) {
+            sidebarCollapse.addEventListener('click', closeSidebar);
+        }
+        if (sidebarExpand) {
+            sidebarExpand.addEventListener('click', openSidebar);
+        }
+        // Responsive: auto close on small screens
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        // --- Client Table Filtering, Sorting, and Actions (Static/Placeholder) ---
+        // This will be enhanced by storage.js for dynamic data.
+        const searchInput = document.getElementById('searchClientsInput');
+        const sortSelect = document.getElementById('sortClients');
+        const tableBody = document.getElementById('clientsTableBody');
+        const allClientRows = Array.from(tableBody.querySelectorAll('tr:not(#noClientsMessageRow)'));
+        const noClientsMessageRow = document.getElementById('noClientsMessageRow');
+        // Pagination elements (very basic)
+        const showingCountEl = document.getElementById('clientsShowingCount');
+        const toCountEl = document.getElementById('clientsToCount');
+        const totalCountEl = document.getElementById('clientsTotalCount');
+
+        function renderTableRows(rowsToRender) {
+            tableBody.innerHTML = '';
+            if (rowsToRender.length === 0) {
+                noClientsMessageRow.style.display = '';
+                tableBody.appendChild(noClientsMessageRow);
+            } else {
+                noClientsMessageRow.style.display = 'none';
+                rowsToRender.forEach(row => tableBody.appendChild(row));
+            }
+            showingCountEl.textContent = rowsToRender.length > 0 ? '1' : '0';
+            toCountEl.textContent = rowsToRender.length;
+            totalCountEl.textContent = allClientRows.length;
+        }
+
+        function filterAndSortClients() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let filteredRows = allClientRows.filter(row => {
+                const name = row.dataset.name.toLowerCase();
+                const email = row.dataset.email.toLowerCase();
+                const company = row.dataset.company.toLowerCase();
+                return name.includes(searchTerm) || email.includes(searchTerm) || company.includes(searchTerm);
+            });
+            const sortValue = sortSelect.value;
+            switch (sortValue) {
+                case 'name_asc':
+                    filteredRows.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+                    break;
+                case 'name_desc':
+                    filteredRows.sort((a, b) => b.dataset.name.localeCompare(a.dataset.name));
+                    break;
+                case 'company_asc':
+                    filteredRows.sort((a, b) => (a.dataset.company || "").localeCompare(b.dataset.company || ""));
+                    break;
+                case 'date_added_newest':
+                    filteredRows.sort((a,b) => new Date(b.dataset.dateAdded) - new Date(a.dataset.dateAdded));
+                    break;
+                case 'date_added_oldest':
+                    filteredRows.sort((a,b) => new Date(a.dataset.dateAdded) - new Date(b.dataset.dateAdded));
+                    break;
+            }
+            renderTableRows(filteredRows);
+        }
+
+        searchInput.addEventListener('input', filterAndSortClients);
+        sortSelect.addEventListener('change', filterAndSortClients);
+        filterAndSortClients();
+
+        // --- Client Actions (Delete, Archive - Placeholder) ---
+        tableBody.addEventListener('click', function(event) {
+            const targetButton = event.target.closest('button[data-action]');
+            if (!targetButton) return;
+            const action = targetButton.dataset.action;
+            const row = targetButton.closest('tr');
+            const clientId = row.dataset.clientId;
+            const clientName = row.dataset.name;
+            if (action === 'delete') {
+                if (confirm(`Are you sure you want to delete client "${clientName}"? This action cannot be undone and may affect existing invoices.`)) {
+                    console.log(`Simulating delete for client: ${clientId} - ${clientName}`);
+                    const index = allClientRows.indexOf(row);
+                    if (index > -1) allClientRows.splice(index, 1);
+                    filterAndSortClients();
+                }
+            } else if (action === 'archive') {
+                if (confirm(`Are you sure you want to archive client "${clientName}"? Archived clients can be restored later.`)) {
+                    console.log(`Simulating archive for client: ${clientId} - ${clientName}`);
+                    targetButton.textContent = 'Unarchive';
+                    targetButton.dataset.action = 'unarchive';
+                    row.classList.add('opacity-50', 'bg-gray-50');
+                }
+            } else if (action === 'unarchive') {
+                console.log(`Simulating unarchive for client: ${clientId} - ${clientName}`);
+                targetButton.textContent = 'Archive';
+                targetButton.dataset.action = 'archive';
+                row.classList.remove('opacity-50', 'bg-gray-50');
+            }
+        });
+
+        // Check for #add-new in URL (e.g., from dashboard quick link)
+        if(window.location.hash === "#add-new") {
+            document.getElementById('addNewClientBtn')?.click();
+        }
+    });
+    </script>
+    </script>
+
+</body>
+</html>

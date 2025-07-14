@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Invoice - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Flatpickr for date picking -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Select2 for enhanced select boxes (optional, example for client selection) -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script> -->
+    <!-- Placeholder for main.js and storage.js -->
+    <script src="notifications.js"></script>
+    <script>
+    // --- Notification Helper ---
+    function showNotification(message, type = 'success', duration = 3000) {
+        if (window.InvoicifyNotifications && typeof window.InvoicifyNotifications.showToast === 'function') {
+            window.InvoicifyNotifications.showToast(message, type, duration);
+        } else if (typeof showToast === 'function') {
+            showToast(message, type, duration);
+        }
+    }
+    </script>
+    <style>
+        .form-input.error, .form-select.error {
+            border-color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+        /* Ensure Select2 dropdowns appear above other elements if used */
+        /* .select2-container { z-index: 50; } */
+
+        /* Responsive sidebar (matches dashboard.html) */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80vw;
+                min-width: 0;
+                max-width: 20rem;
+                transform: translateX(-100%);
+                position: fixed;
+                left: 0;
+                top: 0;
+                z-index: 50;
+            }
+            #sidebar.-translate-x-0 {
+                transform: translateX(0);
+            }
+            #sidebarCollapse {
+                display: block !important;
+            }
+            #sidebarExpand {
+                display: block !important;
+            }
+            .md\:ml-64 {
+                margin-left: 0 !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .responsive-section {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+            .responsive-table table {
+                font-size: 0.95rem;
+            }
+            .responsive-table th, .responsive-table td {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                white-space: nowrap;
+            }
+            .flex.md\:flex-row {
+                flex-direction: column !important;
+            }
+            .p-6 {
+                padding: 1rem !important;
+            }
+            .p-4 {
+                padding: 1rem !important;
+            }
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+                --tw-space-y-reverse: 0;
+                margin-top: 1.25rem !important;
+                margin-bottom: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar (matches dashboard.html/settings.html) -->
+    <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 min-h-screen p-4 space-y-6 transition-transform duration-300 ease-in-out border-r border-gray-200 shadow-md fixed left-0 top-0 h-full -translate-x-full md:translate-x-0 z-40">
+        <button id="sidebarCollapse" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Collapse Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="text-center">
+            <a href="index.html" class="text-2xl font-semibold text-white">Invoicify</a>
+        </div>
+        <nav class="space-y-2">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="invoices.html" class="flex items-center space-x-3 px-4 py-2 rounded-md bg-slate-700 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <span>Invoices</span>
+            </a>
+            <a href="clients.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span>Clients</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.835 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.835 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.835-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+         <div class="mt-auto pt-6 border-t border-slate-700">
+            <a href="index.html" class="flex items-center space-x-3 px-4 py-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col relative md:ml-64 ml-0 transition-all duration-300">
+        <button id="sidebarExpand" class="fixed top-4 left-4 z-30 bg-white border border-gray-200 shadow p-2 rounded-full text-gray-400 hover:text-blue-600 focus:outline-none md:hidden" title="Expand Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sticky top-0 z-20">
+            <h1 id="pageTitle" class="text-xl font-semibold text-gray-700">Create New Invoice</h1>
+             <div class="flex items-center space-x-4">
+                <!-- User Profile/Notifications (same as dashboard) -->
+                 <button class="relative text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                </button>
+                <div class="relative">
+                    <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User+Name&background=random&color=fff" alt="User Avatar">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-2 sm:p-4 md:p-6 space-y-4 md:space-y-8">
+            <form id="invoiceForm" class="space-y-8">
+                <!-- Color Picker for Invoice Theme -->
+                <section class="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row md:items-center md:space-x-6 mb-2">
+                    <div class="flex-1">
+                        <label for="mainColorPicker" class="block text-sm font-medium text-gray-700 mb-1">Main Color</label>
+                        <input type="color" id="mainColorPicker" name="mainColorPicker" value="#1d4ed8" class="w-12 h-8 p-0 border-0 bg-transparent cursor-pointer" />
+                        <label for="textColorPicker" class="block text-sm font-medium text-gray-700 mb-1 mt-4">Text Color</label>
+                        <input type="color" id="textColorPicker" name="textColorPicker" value="#1F2937" class="w-12 h-8 p-0 border-0 bg-transparent cursor-pointer" />
+                        <p class="text-xs text-gray-500 mt-1">Choose the main accent and text color for your invoice preview.</p>
+                    </div>
+                </section>
+                <!-- Business Logo Upload -->
+                <section class="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row md:items-center md:space-x-6 mb-2">
+                    <div class="flex-shrink-0 mb-4 md:mb-0">
+                        <div id="logoPreviewContainer" class="w-24 h-24 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50">
+                            <img id="logoPreview" src="" alt="Logo Preview" class="object-contain w-full h-full hidden" />
+                            <span id="logoPlaceholder" class="text-gray-400 text-xs">No Logo</span>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <label for="businessLogo" class="block text-sm font-medium text-gray-700 mb-1">Business Logo (optional)</label>
+                        <input type="file" id="businessLogo" name="businessLogo" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG, or GIF. Max 1MB.</p>
+                        <p id="logoError" class="text-xs text-red-500 mt-1"></p>
+                    </div>
+                </section>
+                <!-- Client & Invoice Details -->
+                <section class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="client" class="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                            <select id="client" name="client" required
+                                    class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select a client</option>
+                                <!-- Sample clients, will be populated by JS from storage.js -->
+                                <option value="client1_id">Tech Solutions Inc.</option>
+                                <option value="client2_id">Creative Designs LLC</option>
+                                <option value="client3_id">WebWorks Co.</option>
+                            </select>
+                            <p class="error-message mt-1" id="clientError"></p>
+                            <a href="client-new.html" class="text-sm text-blue-500 hover:underline mt-1 inline-block">+ Add New Client</a>
+                        </div>
+                        <div>
+                            <label for="invoiceNumber" class="block text-sm font-medium text-gray-700 mb-1">Invoice Number</label>
+                            <input type="text" id="invoiceNumber" name="invoiceNumber" readonly
+                                   class="form-input w-full bg-gray-100 px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-500 mt-1">Automatically generated or based on settings.</p>
+                        </div>
+                        <div>
+                            <label for="issueDate" class="block text-sm font-medium text-gray-700 mb-1">Issue Date</label>
+                            <input type="text" id="issueDate" name="issueDate" required placeholder="YYYY-MM-DD"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <p class="error-message mt-1" id="issueDateError"></p>
+                        </div>
+                        <div>
+                            <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                            <input type="text" id="dueDate" name="dueDate" required placeholder="YYYY-MM-DD"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <p class="error-message mt-1" id="dueDateError"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Items/Services -->
+                <section class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Items / Services</h3>
+                    <div id="invoiceItemsContainer" class="space-y-4">
+                        <!-- Item Row Template (will be cloned by JS) -->
+                        <div class="invoice-item grid grid-cols-12 gap-x-4 gap-y-2 items-end border-b pb-4 border-gray-200 last:border-b-0">
+                            <div class="col-span-12 md:col-span-5">
+                                <label class="block text-xs font-medium text-gray-700">Description</label>
+                                <input type="text" name="itemDescription[]" placeholder="Service or product name" required
+                                       class="form-input mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div class="col-span-4 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-700">Quantity</label>
+                                <input type="number" name="itemQuantity[]" value="1" min="0.01" step="0.01" required
+                                       class="form-input mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div class="col-span-4 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-700">Unit Price</label>
+                                <input type="number" name="itemPrice[]" placeholder="0.00" min="0" step="0.01" required
+                                       class="form-input mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div class="col-span-4 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-700">Total</label>
+                                <input type="text" name="itemTotal[]" readonly
+                                       class="form-input mt-1 w-full bg-gray-100 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                            </div>
+                            <div class="col-span-12 md:col-span-1 flex justify-end md:justify-start">
+                                <button type="button" class="remove-item-btn text-red-500 hover:text-red-700 p-1 mt-1 md:mt-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- End Item Row Template -->
+                    </div>
+                    <button type="button" id="addItemBtn" class="mt-4 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Add Item
+                    </button>
+                </section>
+
+                <!-- Totals & Notes -->
+                <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Notes / Terms</h3>
+                        <textarea id="notes" name="notes" rows="4" placeholder="E.g., Payment terms, thank you note"
+                                  class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        
+                        <div class="mt-4">
+                             <label for="currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                             <select id="currency" name="currency" class="form-select w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                 <option value="USD" selected>USD ($)</option>
+                                 <option value="GHS">GHS (₵)</option>
+                                 <option value="EUR">EUR (€)</option>
+                                 <option value="GBP">GBP (£)</option>
+                             </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span id="subtotalAmount" class="font-semibold text-gray-800">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label for="discount" class="text-gray-600">Discount (%):</label>
+                            <input type="number" id="discount" name="discount" value="0" min="0" max="100" step="0.01"
+                                   class="form-input w-20 text-right px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm">
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Discount Amount:</span>
+                            <span id="discountAmountValue" class="font-semibold text-gray-800">-$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label for="tax" class="text-gray-600">Tax (%):</label>
+                            <input type="number" id="tax" name="tax" value="0" min="0" max="100" step="0.01"
+                                   class="form-input w-20 text-right px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm">
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Tax Amount:</span>
+                            <span id="taxAmountValue" class="font-semibold text-gray-800">+$0.00</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between items-center text-xl">
+                            <span class="font-bold text-gray-800">Total:</span>
+                            <span id="totalAmount" class="font-bold text-blue-600">$0.00</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Actions -->
+                <section class="flex flex-col sm:flex-row justify-end items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                    <p id="formMessage" class="text-sm"></p>
+                    <button type="button" id="saveDraftBtn"
+                            class="w-full sm:w-auto px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Save Draft
+                    </button>
+                    <button type="submit" id="sendInvoiceBtn"
+                            class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Save and Send Invoice
+                    </button>
+                    <button type="button" id="sendWhatsappBtn"
+                            class="w-full sm:w-auto px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.67.15-.198.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.007-.372-.009-.571-.009-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.099 3.205 5.077 4.372.71.306 1.263.489 1.695.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.288.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.004 2.003c-5.514 0-9.997 4.484-9.997 9.997 0 1.762.463 3.479 1.341 4.991l-1.409 5.151a1.001 1.001 0 001.225 1.225l5.151-1.409a9.953 9.953 0 004.689 1.193h.004c5.514 0 9.997-4.484 9.997-9.997 0-2.669-1.04-5.178-2.929-7.067-1.889-1.889-4.398-2.929-7.067-2.929zm0 18.181a8.16 8.16 0 01-4.153-1.143l-.297-.176-3.057.837.818-2.978-.193-.306a8.13 8.13 0 01-1.26-4.384c0-4.504 3.662-8.166 8.166-8.166 2.181 0 4.233.851 5.773 2.392a8.13 8.13 0 012.393 5.773c0 4.504-3.662 8.166-8.166 8.166z"/></svg>
+                        Send to WhatsApp
+                    </button>
+                    <button type="button" id="sendPdfWhatsappBtn"
+                            class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        Download PDF & Send to WhatsApp
+                    </button>
+                </section>
+            </form>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Sidebar Collapse/Expand (matches dashboard.html/settings.html) ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarExpand = document.getElementById('sidebarExpand');
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('-translate-x-0');
+            if (window.innerWidth < 768) {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.remove('hidden');
+            } else {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.add('hidden');
+            }
+        }
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('-translate-x-0');
+            if (window.innerWidth < 768) {
+                sidebarCollapse.classList.remove('hidden');
+                sidebarExpand.classList.add('hidden');
+            } else {
+                sidebarCollapse.classList.add('hidden');
+                sidebarExpand.classList.add('hidden');
+            }
+        }
+        if (sidebarCollapse) {
+            sidebarCollapse.addEventListener('click', closeSidebar);
+        }
+        if (sidebarExpand) {
+            sidebarExpand.addEventListener('click', openSidebar);
+        }
+        // On load and resize, always close sidebar on mobile, open on desktop, and set button visibility
+        function handleSidebarOnLoad() {
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+        window.addEventListener('resize', handleSidebarOnLoad);
+        handleSidebarOnLoad();
+
+        // --- PDF to WhatsApp Functionality ---
+        document.getElementById('sendPdfWhatsappBtn').addEventListener('click', async function() {
+            showNotification('Invoice PDF downloaded & WhatsApp opened!', 'success');
+            // Dynamically load jsPDF if not present
+            if (typeof window.jspdf === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                document.body.appendChild(script);
+                await new Promise(resolve => { script.onload = resolve; });
+            }
+            const { jsPDF } = window.jspdf;
+            // Collect invoice data (simple summary for PDF)
+            const client = document.getElementById('client');
+            const clientName = client.options[client.selectedIndex] ? client.options[client.selectedIndex].text : '';
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const currency = document.getElementById('currency').value;
+            const subtotal = document.getElementById('subtotalAmount').textContent;
+            const discount = document.getElementById('discount').value;
+            const tax = document.getElementById('tax').value;
+            const total = document.getElementById('totalAmount').textContent;
+            const notes = document.getElementById('notes').value;
+
+            // Items
+            let items = [];
+            document.querySelectorAll('.invoice-item').forEach((row, idx) => {
+                const desc = row.querySelector('input[name="itemDescription[]"]').value;
+                const qty = row.querySelector('input[name="itemQuantity[]"]').value;
+                const price = row.querySelector('input[name="itemPrice[]"]').value;
+                const total = row.querySelector('input[name="itemTotal[]"]').value;
+                if (desc) {
+                    items.push({desc, qty, price, total});
+                }
+            });
+
+            // Generate PDF
+            const doc = new jsPDF();
+            let y = 15;
+            doc.setFontSize(16);
+            doc.text('Invoice', 105, y, {align: 'center'}); y += 10;
+            doc.setFontSize(11);
+            doc.text(`Invoice No: ${invoiceNumber}`, 15, y); y += 7;
+            doc.text(`Client: ${clientName}`, 15, y); y += 7;
+            doc.text(`Issue Date: ${issueDate}`, 15, y); y += 7;
+            doc.text(`Due Date: ${dueDate}`, 15, y); y += 10;
+            doc.text('Items:', 15, y); y += 7;
+            items.forEach((item, idx) => {
+                doc.text(`${idx+1}. ${item.desc} (Qty: ${item.qty}, Unit: ${item.price}, Total: ${item.total})`, 20, y); y += 7;
+            });
+            y += 3;
+            doc.text(`Subtotal: ${subtotal}`, 15, y); y += 7;
+            doc.text(`Discount: ${discount}%`, 15, y); y += 7;
+            doc.text(`Tax: ${tax}%`, 15, y); y += 7;
+            doc.text(`Total: ${total}`, 15, y); y += 7;
+            if (notes) { doc.text(`Notes: ${notes}`, 15, y); y += 7; }
+
+            // Download PDF
+            const pdfFileName = `Invoice_${invoiceNumber}.pdf`;
+            doc.save(pdfFileName);
+
+            // Open WhatsApp Web (user must attach PDF manually)
+            setTimeout(() => {
+                window.open('https://web.whatsapp.com/', '_blank');
+                alert('PDF downloaded! Please attach it in WhatsApp Web to send to your client.');
+            }, 500);
+        });
+
+        // --- Business Logo Upload ---
+        const businessLogoInput = document.getElementById('businessLogo');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoPreviewContainer = document.getElementById('logoPreviewContainer');
+        const logoPlaceholder = document.getElementById('logoPlaceholder');
+        const logoError = document.getElementById('logoError');
+        let logoDataUrl = '';
+
+        businessLogoInput.addEventListener('change', function(e) {
+            logoError.textContent = '';
+            const file = e.target.files[0];
+            if (!file) {
+                logoPreview.src = '';
+                logoPreview.classList.add('hidden');
+                logoPlaceholder.classList.remove('hidden');
+                logoDataUrl = '';
+                return;
+            }
+            if (!file.type.startsWith('image/')) {
+                logoError.textContent = 'Please select a valid image file.';
+                businessLogoInput.value = '';
+                return;
+            }
+            if (file.size > 1024 * 1024) {
+                logoError.textContent = 'Image must be less than 1MB.';
+                businessLogoInput.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                logoPreview.src = ev.target.result;
+                logoPreview.classList.remove('hidden');
+                logoPlaceholder.classList.add('hidden');
+                logoDataUrl = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // --- WhatsApp Send Functionality ---
+        document.getElementById('sendWhatsappBtn').addEventListener('click', function() {
+            showNotification('Invoice sent to WhatsApp!', 'success');
+            // Collect invoice summary data
+            const client = document.getElementById('client');
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const currency = document.getElementById('currency').value;
+            const subtotal = document.getElementById('subtotalAmount').textContent;
+            const discount = document.getElementById('discount').value;
+            const tax = document.getElementById('tax').value;
+            const total = document.getElementById('totalAmount').textContent;
+            const notes = document.getElementById('notes').value;
+
+            // Get client name from select
+            const clientName = client.options[client.selectedIndex] ? client.options[client.selectedIndex].text : '';
+
+            // Build invoice items summary
+            let itemsText = '';
+            document.querySelectorAll('.invoice-item').forEach((row, idx) => {
+                const desc = row.querySelector('input[name="itemDescription[]"]').value;
+                const qty = row.querySelector('input[name="itemQuantity[]"]').value;
+                const price = row.querySelector('input[name="itemPrice[]"]').value;
+                const total = row.querySelector('input[name="itemTotal[]"]').value;
+                if (desc) {
+                    itemsText += `\n${idx+1}. ${desc} (Qty: ${qty}, Unit: ${price}, Total: ${total})`;
+                }
+            });
+
+            // Compose WhatsApp message
+            let message = `*Invoice* %0A`;
+            message += `Invoice No: ${invoiceNumber}%0A`;
+            message += `Client: ${clientName}%0A`;
+            message += `Issue Date: ${issueDate}%0A`;
+            message += `Due Date: ${dueDate}%0A`;
+            message += `------------------------%0A`;
+            message += `*Items*:%0A${encodeURIComponent(itemsText)}%0A`;
+            message += `------------------------%0A`;
+            message += `Subtotal: ${subtotal}%0A`;
+            message += `Discount: ${discount}% %0A`;
+            message += `Tax: ${tax}% %0A`;
+            message += `*Total: ${total}*%0A`;
+            if (notes) message += `Notes: ${encodeURIComponent(notes)}%0A`;
+
+            // WhatsApp API link (user will choose recipient)
+            const whatsappUrl = `https://wa.me/?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        });
+
+        // --- Initialize Date Pickers ---
+        flatpickr("#issueDate", { dateFormat: "Y-m-d", defaultDate: "today" });
+        flatpickr("#dueDate", { dateFormat: "Y-m-d", defaultDate: new Date().fp_incr(14) }); // Default due in 14 days
+
+        // --- Invoice Number Generation (Placeholder) ---
+        // In a real app, this would come from settings or be generated server-side/storage.js
+        const invoiceNumberInput = document.getElementById('invoiceNumber');
+        if (!invoiceNumberInput.value) { // Only if not editing
+            invoiceNumberInput.value = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000) + 1).padStart(4, '0')}`;
+        }
+        
+        // --- Dynamic Item Rows ---
+        const itemsContainer = document.getElementById('invoiceItemsContainer');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const itemRowTemplate = itemsContainer.querySelector('.invoice-item').cloneNode(true);
+        // Clear template inputs if they have values (though they shouldn't by default)
+        itemRowTemplate.querySelectorAll('input').forEach(input => {
+            if (input.type !== 'number' || input.name !== 'itemQuantity[]') input.value = ''; // Keep qty 1 default
+            if (input.name === 'itemQuantity[]') input.value = '1';
+            if (input.name === 'itemPrice[]') input.placeholder = '0.00';
+        });
+
+
+        function addInvoiceItem() {
+            const newItemRow = itemRowTemplate.cloneNode(true);
+            itemsContainer.appendChild(newItemRow);
+            attachItemRowListeners(newItemRow);
+            updateTotals();
+        }
+
+        function removeItemRow(event) {
+            if (itemsContainer.querySelectorAll('.invoice-item').length > 1) {
+                event.target.closest('.invoice-item').remove();
+                updateTotals();
+            } else {
+                // Optionally, provide feedback that at least one item is required
+                // or clear the fields of the last item.
+                alert("At least one item is required.");
+            }
+        }
+        
+        function attachItemRowListeners(row) {
+            row.querySelector('.remove-item-btn').addEventListener('click', removeItemRow);
+            row.querySelectorAll('input[name="itemQuantity[]"], input[name="itemPrice[]"]').forEach(input => {
+                input.addEventListener('input', updateTotals);
+            });
+        }
+
+        // Attach listeners to the initial item row
+        document.querySelectorAll('.invoice-item').forEach(attachItemRowListeners);
+        addItemBtn.addEventListener('click', addInvoiceItem);
+
+
+        // --- Real-time Totals Calculation ---
+        const discountInput = document.getElementById('discount');
+        const taxInput = document.getElementById('tax');
+        const currencySelect = document.getElementById('currency');
+
+        function formatCurrency(amount, currencyCode = currencySelect.value) {
+            try {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(amount);
+            } catch (e) { // Fallback for invalid currency codes during testing or if list changes
+                return `${currencyCode} ${amount.toFixed(2)}`;
+            }
+        }
+
+        function updateTotals() {
+            let subtotal = 0;
+            itemsContainer.querySelectorAll('.invoice-item').forEach(row => {
+                const quantity = parseFloat(row.querySelector('input[name="itemQuantity[]"]').value) || 0;
+                const price = parseFloat(row.querySelector('input[name="itemPrice[]"]').value) || 0;
+                const itemTotal = quantity * price;
+                row.querySelector('input[name="itemTotal[]"]').value = itemTotal.toFixed(2); // Display item total locally
+                subtotal += itemTotal;
+            });
+
+            const discountPercent = parseFloat(discountInput.value) || 0;
+            const taxPercent = parseFloat(taxInput.value) || 0;
+
+            const discountAmount = subtotal * (discountPercent / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const taxAmount = subtotalAfterDiscount * (taxPercent / 100); // Tax on discounted amount
+            const total = subtotalAfterDiscount + taxAmount;
+
+            document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal);
+            document.getElementById('discountAmountValue').textContent = `-${formatCurrency(discountAmount)}`;
+            document.getElementById('taxAmountValue').textContent = `+${formatCurrency(taxAmount)}`;
+            document.getElementById('totalAmount').textContent = formatCurrency(total);
+        }
+
+        discountInput.addEventListener('input', updateTotals);
+        taxInput.addEventListener('input', updateTotals);
+        currencySelect.addEventListener('change', updateTotals); // Recalculate with new currency symbol
+
+        // Initial calculation
+        updateTotals();
+
+        // --- Form Submission (Placeholder) ---
+        const invoiceForm = document.getElementById('invoiceForm');
+        const formMessage = document.getElementById('formMessage');
+        const clientSelect = document.getElementById('client');
+        const clientError = document.getElementById('clientError');
+        const issueDateInput = document.getElementById('issueDate');
+        const issueDateError = document.getElementById('issueDateError');
+        const dueDateInput = document.getElementById('dueDate');
+        const dueDateError = document.getElementById('dueDateError');
+        const pageTitle = document.getElementById('pageTitle');
+
+
+        function validateForm() {
+            let isValid = true;
+            // Client
+            if (!clientSelect.value) {
+                clientError.textContent = 'Please select a client.';
+                clientSelect.classList.add('error');
+                isValid = false;
+            } else {
+                clientError.textContent = '';
+                clientSelect.classList.remove('error');
+            }
+            // Issue Date
+            if (!issueDateInput.value) {
+                issueDateError.textContent = 'Issue date is required.';
+                issueDateInput.classList.add('error');
+                isValid = false;
+            } else {
+                issueDateError.textContent = '';
+                issueDateInput.classList.remove('error');
+            }
+            // Due Date
+            if (!dueDateInput.value) {
+                dueDateError.textContent = 'Due date is required.';
+                dueDateInput.classList.add('error');
+                isValid = false;
+            } else if (new Date(dueDateInput.value) < new Date(issueDateInput.value)) {
+                 dueDateError.textContent = 'Due date cannot be before issue date.';
+                 dueDateInput.classList.add('error');
+                 isValid = false;
+            }
+            else {
+                dueDateError.textContent = '';
+                dueDateInput.classList.remove('error');
+            }
+
+            // Item descriptions (at least one item should have a description)
+            let hasValidItem = false;
+            itemsContainer.querySelectorAll('.invoice-item').forEach((row, index) => {
+                const descInput = row.querySelector('input[name="itemDescription[]"]');
+                const qtyInput = row.querySelector('input[name="itemQuantity[]"]');
+                const priceInput = row.querySelector('input[name="itemPrice[]"]');
+                
+                if (descInput.value.trim() === '') {
+                    descInput.classList.add('error'); // You might want specific error messages per item
+                } else {
+                    descInput.classList.remove('error');
+                    hasValidItem = true; // At least one item has a description
+                }
+                if (parseFloat(qtyInput.value) <= 0) qtyInput.classList.add('error'); else qtyInput.classList.remove('error');
+                if (parseFloat(priceInput.value) < 0) priceInput.classList.add('error'); else priceInput.classList.remove('error');
+
+                if(descInput.value.trim() === '' || parseFloat(qtyInput.value) <= 0 || parseFloat(priceInput.value) < 0){
+                    isValid = false;
+                }
+            });
+             if (!hasValidItem && itemsContainer.querySelectorAll('.invoice-item').length > 0) {
+                // General message if no items have descriptions or are valid
+                alert("Please ensure all items have a description, valid quantity, and price.");
+                isValid = false;
+            }
+
+
+            return isValid;
+        }
+
+
+        invoiceForm.addEventListener('submit', function(event) { // Handles "Save and Send"
+            showNotification('Invoice saved and sent!', 'success');
+            event.preventDefault();
+            formMessage.textContent = '';
+            formMessage.className = 'text-sm';
+
+            if (validateForm()) {
+                // Collect form data (example)
+                const formData = new FormData(invoiceForm);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key.endsWith('[]')) { // Handle array fields like items
+                        if (!data[key]) data[key] = [];
+                        data[key].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+                // Attach logo data if present
+                if (logoDataUrl) {
+                    data.logo = logoDataUrl;
+                }
+                data.subtotal = document.getElementById('subtotalAmount').textContent;
+                data.total = document.getElementById('totalAmount').textContent;
+                data.status = 'unpaid'; // Or 'sent'
+                data.invoiceId = invoiceNumberInput.value;
+
+                // Compose company and client info for preview
+                data.company = {
+                    name: 'Your Company Name',
+                    address: '123 Business Rd, Suite 100\nCity, State, 12345',
+                    contact: 'email@example.com | (555) 123-4567',
+                    logo: data.logo || ''
+                };
+                data.client = {
+                    name: document.getElementById('client').options[document.getElementById('client').selectedIndex].text,
+                    address: '', // You can enhance this to pull from storage.js if available
+                    email: ''
+                };
+                data.items = [];
+                if (data['itemDescription[]'] && Array.isArray(data['itemDescription[]'])) {
+                    for (let i = 0; i < data['itemDescription[]'].length; i++) {
+                        data.items.push({
+                            description: data['itemDescription[]'][i],
+                            quantity: data['itemQuantity[]'][i],
+                            price: data['itemPrice[]'][i]
+                        });
+                    }
+                }
+                data.discountPercent = data.discount || 0;
+                data.taxPercent = data.tax || 0;
+                data.notes = data.notes || '';
+                data.footerContact = { name: 'Your Name', email: 'your@email.com' };
+                data.currency = document.getElementById('currency').value || 'USD';
+
+                // Get color values from pickers
+                const mainColor = document.getElementById('mainColorPicker').value;
+                const textColor = document.getElementById('textColorPicker').value;
+
+                // Save to sessionStorage for preview page
+                sessionStorage.setItem('invoicePreview_' + data.invoiceId, JSON.stringify(data));
+
+                // Redirect to preview page with invoice id and color params
+                window.location.href = 'invoice-preview.html?id=' + encodeURIComponent(data.invoiceId) +
+                    '&color=' + encodeURIComponent(mainColor) + '&text=' + encodeURIComponent(textColor);
+            } else {
+                formMessage.textContent = 'Please correct the errors in the form.';
+                formMessage.classList.add('text-red-600');
+            }
+        });
+
+        document.getElementById('saveDraftBtn').addEventListener('click', function() {
+            showNotification('Invoice draft saved!', 'success');
+            formMessage.textContent = '';
+            formMessage.className = 'text-sm';
+
+            if (validateForm()) { // Basic validation might still be good for drafts
+                const formData = new FormData(invoiceForm);
+                 const data = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key.endsWith('[]')) {
+                        if (!data[key]) data[key] = [];
+                        data[key].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+                // Attach logo data if present
+                if (logoDataUrl) {
+                    data.logo = logoDataUrl;
+                }
+                data.subtotal = document.getElementById('subtotalAmount').textContent;
+                data.total = document.getElementById('totalAmount').textContent;
+                data.status = 'draft';
+                data.invoiceId = invoiceNumberInput.value;
+
+                console.log("Invoice Data (Save Draft):", data);
+                // TODO: Integrate with storage.js to save the invoice as draft
+                formMessage.textContent = 'Invoice saved as draft! (Simulated)';
+                formMessage.classList.add('text-green-600');
+                 setTimeout(() => {
+                    window.location.href = 'invoices.html?filter=draft'; // Redirect to invoices list, draft filter
+                }, 1500);
+            } else {
+                 formMessage.textContent = 'Please fill in required fields to save a draft.';
+                 formMessage.classList.add('text-red-600');
+            }
+        });
+
+
+        // --- Edit Mode ---
+        // Check URL parameters for an edit_id
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit_id');
+
+        if (editId) {
+            pageTitle.textContent = `Edit Invoice ${editId}`;
+            invoiceNumberInput.value = editId;
+            // TODO: In a real app, fetch invoice data using editId from storage.js
+            // and populate the form fields, including items.
+            // For demo, let's pre-fill some data if editing DRAFT-001 from invoices.html sample
+            if (editId === "DRAFT-001") {
+                clientSelect.value = "client2_id"; // Creative Designs LLC
+                flatpickr("#issueDate", {defaultDate: "2024-07-18"});
+                //dueDateInput.value = ""; // Drafts might not have due dates
+                
+                // Clear existing items before adding new ones if any were auto-added
+                while (itemsContainer.children.length > 1) { // Keep one template if logic relies on it
+                     itemsContainer.removeChild(itemsContainer.lastChild);
+                }
+                 if(itemsContainer.children.length === 1 && itemsContainer.querySelector('input[name="itemDescription[]"]').value !== "") {
+                    // if the first default item has data, clear it or remove it and add new
+                    itemsContainer.innerHTML = ''; // Clear all, then add one
+                    addInvoiceItem(); // Add a fresh one
+                }
+
+
+                // Sample item for DRAFT-001
+                const firstItemRow = itemsContainer.querySelector('.invoice-item');
+                if (firstItemRow) {
+                    firstItemRow.querySelector('input[name="itemDescription[]"]').value = "Initial Consultation";
+                    firstItemRow.querySelector('input[name="itemQuantity[]"]').value = "1";
+                    firstItemRow.querySelector('input[name="itemPrice[]"]').value = "150";
+                }
+                addInvoiceItem(); // Add a second item for example
+                const secondItemRow = itemsContainer.querySelectorAll('.invoice-item')[1];
+                 if (secondItemRow) {
+                    secondItemRow.querySelector('input[name="itemDescription[]"]').value = "Logo Design Sketch";
+                    secondItemRow.querySelector('input[name="itemQuantity[]"]').value = "1";
+                    secondItemRow.querySelector('input[name="itemPrice[]"]').value = "350";
+                }
+
+
+                document.getElementById('notes').value = "This is a draft invoice for initial discussion.";
+                currencySelect.value = "USD";
+                discountInput.value = "0";
+                taxInput.value = "0";
+                updateTotals();
+            } else {
+                 console.warn(`Edit mode for ${editId}, but no sample data to load. Implement fetching from storage.js.`);
+            }
+        } else {
+             // Add one default item row if creating a new invoice
+            if(itemsContainer.children.length === 0) { // Should not happen with template in HTML
+                 addInvoiceItem();
+            } else if (itemsContainer.children.length === 1) {
+                // If only the template row exists, ensure its listeners are attached
+                // (though DOMContentLoaded should handle the initial one)
+                // and clear its values if it's not meant to be a default item.
+                const firstRow = itemsContainer.querySelector('.invoice-item');
+                firstRow.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                    if(input.name !== 'itemQuantity[]') input.value = ''; // Clear all but quantity
+                    else input.value = '1'; // Default quantity to 1
+                });
+                 attachItemRowListeners(firstRow); // ensure listeners
+            }
+        }
+        updateTotals(); // Ensure totals are correct on load, especially in edit mode.
+
+    });
+    </script>
+
+</body>
+</html>

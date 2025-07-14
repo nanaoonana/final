@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Placeholder for main.js and storage.js -->
+    <!-- <script src="main.js" defer></script> -->
+    <!-- <script src="storage.js" defer></script> -->
+    <style>
+        .form-input.error, .form-select.error, .form-textarea.error {
+            border-color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+        /* Toggle switch styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #2563EB; /* blue-600 */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #2563EB; /* blue-600 */
+        }
+        /* Responsive sidebar (matches dashboard.html) */
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80vw;
+                min-width: 0;
+                max-width: 20rem;
+                transform: translateX(-100%);
+                position: fixed;
+                left: 0;
+                top: 0;
+                z-index: 50;
+            }
+            #sidebar.-translate-x-0 {
+                transform: translateX(0);
+            }
+            #sidebarCollapse {
+                display: block !important;
+            }
+            #sidebarExpand {
+                display: block !important;
+            }
+            .md\:ml-64 {
+                margin-left: 0 !important;
+            }
+        }
+        @media (max-width: 640px) {
+            #settingsForm {
+                padding: 1rem !important;
+            }
+            #settingsForm .grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            #settingsForm .flex.md\:flex-row {
+                flex-direction: column !important;
+            }
+            #settingsForm .md\:col-span-2 {
+                grid-column: span 1 / span 1 !important;
+            }
+            #settingsForm button, #settingsForm input, #settingsForm select, #settingsForm textarea {
+                font-size: 1rem !important;
+            }
+            #settingsForm label, #settingsForm legend {
+                font-size: 1rem !important;
+            }
+            #settingsForm .h-16 {
+                height: 3rem !important;
+            }
+        }
+        @media (max-width: 480px) {
+            #settingsForm {
+                padding: 0.5rem !important;
+            }
+            #settingsForm button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar (matches dashboard.html) -->
+    <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 min-h-screen p-4 space-y-6 transition-transform duration-300 ease-in-out border-r border-gray-200 shadow-md fixed left-0 top-0 h-full" style="z-index: 40;">
+        <button id="sidebarCollapse" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Collapse Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="text-center">
+            <a href="index.html" class="text-2xl font-semibold text-white">Invoicify</a>
+        </div>
+        <nav class="space-y-2">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="invoices.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <span>Invoices</span>
+            </a>
+            <a href="clients.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span>Clients</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 px-4 py-2 rounded-md bg-slate-700 text-white"> <!-- Active page -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.835 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.835 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.835-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+         <div class="mt-auto pt-6 border-t border-slate-700">
+            <a href="index.html" class="flex items-center space-x-3 px-4 py-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col relative md:ml-64 ml-0 transition-all duration-300">
+        <button id="sidebarExpand" class="fixed top-4 left-4 z-30 bg-white border border-gray-200 shadow p-2 rounded-full text-gray-400 hover:text-blue-600 focus:outline-none md:hidden" title="Expand Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sticky top-0 z-20">
+            <h1 class="text-xl font-semibold text-gray-700">Application Settings</h1>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button class="relative text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </button>
+                <div class="relative">
+                    <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User+Name&background=random&color=fff" alt="User Avatar">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-6">
+            <form id="settingsForm" class="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto space-y-8 main-content">
+
+                <!-- Business Information -->
+                <fieldset>
+                    <legend class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Business Information</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="businessName" class="block text-sm font-medium text-gray-700 mb-1">Business Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="businessName" name="businessName" required
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <p class="error-message mt-1" id="businessNameError"></p>
+                        </div>
+                        <div>
+                            <label for="businessLogo" class="block text-sm font-medium text-gray-700 mb-1">Business Logo URL</label>
+                            <input type="url" id="businessLogo" name="businessLogo" placeholder="https://example.com/logo.png"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 mb-2">
+                            <p class="error-message mt-1" id="businessLogoError"></p>
+                            <img id="logoPreview" src="#" alt="Logo Preview" class="mt-2 h-16 hidden object-contain">
+
+                            <div class="mt-4">
+                                <label for="businessLogoUpload" class="block text-sm font-medium text-gray-700 mb-1">Or Upload Logo Image</label>
+                                <input type="file" id="businessLogoUpload" accept="image/*"
+                                       class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Supported formats: PNG, JPG, SVG. Max size: 1MB.</p>
+                                <p class="error-message mt-1" id="businessLogoUploadError"></p>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="businessAddress" class="block text-sm font-medium text-gray-700 mb-1">Business Address</label>
+                            <textarea id="businessAddress" name="businessAddress" rows="3"
+                                      class="form-textarea w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                         <div>
+                            <label for="businessContact" class="block text-sm font-medium text-gray-700 mb-1">Contact Email/Phone</label>
+                            <input type="text" id="businessContact" name="businessContact" placeholder="email@example.com | (555) 123-4567"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Invoice Customization -->
+                <fieldset>
+                    <legend class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 pt-4">Invoice Settings</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="defaultCurrency" class="block text-sm font-medium text-gray-700 mb-1">Default Currency <span class="text-red-500">*</span></label>
+                            <select id="defaultCurrency" name="defaultCurrency" required
+                                    class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                <option value="USD">USD ($ - United States Dollar)</option>
+                                <option value="GHS">GHS (₵ - Ghanaian Cedi)</option>
+                                <option value="EUR">EUR (€ - Euro)</option>
+                                <option value="GBP">GBP (£ - British Pound)</option>
+                                <option value="CAD">CAD ($ - Canadian Dollar)</option>
+                                <option value="AUD">AUD ($ - Australian Dollar)</option>
+                            </select>
+                            <p class="error-message mt-1" id="defaultCurrencyError"></p>
+                        </div>
+                        <div>
+                            <label for="invoiceNumberFormat" class="block text-sm font-medium text-gray-700 mb-1">Invoice Number Format</label>
+                            <input type="text" id="invoiceNumberFormat" name="invoiceNumberFormat" placeholder="INV-{YYYY}-{NNNN}"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Use {YYYY} for year, {MM} for month, {DD} for day, {NNNN} for sequential number.</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="defaultNotes" class="block text-sm font-medium text-gray-700 mb-1">Default Invoice Notes/Terms</label>
+                            <textarea id="defaultNotes" name="defaultNotes" rows="3" placeholder="e.g., Thank you for your business! Payment due in 30 days."
+                                      class="form-textarea w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Notification Settings -->
+                <fieldset>
+                    <legend class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 pt-4">Notification Preferences</legend>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Email me on new invoice payment</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="notifyPayment" id="notifyPayment" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="notifyPayment" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                         <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Email client when invoice is sent</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="notifyClientInvoiceSent" id="notifyClientInvoiceSent" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="notifyClientInvoiceSent" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">Send overdue reminders automatically</span>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="autoOverdueReminders" id="autoOverdueReminders" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="autoOverdueReminders" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Payment Methods -->
+                <fieldset>
+                    <legend class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 pt-4">Payment Methods</legend>
+                    <div class="space-y-4">
+                        <div id="paymentMethodsList" class="space-y-2">
+                            <!-- Payment methods will be listed here -->
+                        </div>
+                        <form id="addPaymentMethodForm" class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-2 md:space-y-0">
+                            <div class="flex-1">
+                                <label for="paymentMethodType" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                <select id="paymentMethodType" class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                    <option value="Bank">Bank</option>
+                                    <option value="Mobile Money">Mobile Money</option>
+                                    <option value="PayPal">PayPal</option>
+                                    <option value="Stripe">Stripe</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="flex-1">
+                                <label for="paymentMethodDetails" class="block text-sm font-medium text-gray-700 mb-1">Details</label>
+                                <input type="text" id="paymentMethodDetails" placeholder="e.g., Bank Account #, MoMo Number, PayPal Email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm">Add</button>
+                        </form>
+                        <p class="text-xs text-gray-500 mt-1">Add your preferred payment methods for invoices (e.g., bank, mobile money, PayPal, etc.).</p>
+                    </div>
+                </fieldset>
+
+                <!-- Data Management -->
+                <fieldset>
+                    <legend class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2 pt-4">Data Management</legend>
+                    <div class="space-y-3 md:space-y-0 md:flex md:space-x-4">
+                        <button type="button" id="backupDataBtn" class="w-full md:w-auto justify-center flex items-center px-4 py-2 border border-blue-500 text-blue-500 rounded-md shadow-sm text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                              <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            Backup Data (JSON)
+                        </button>
+                        <button type="button" id="exportDataBtn" class="w-full md:w-auto justify-center flex items-center px-4 py-2 border border-green-500 text-green-500 rounded-md shadow-sm text-sm font-medium hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            Export All Data (CSV)
+                        </button>
+                    </div>
+                </fieldset>
+
+                <!-- Form Actions -->
+                <div class="pt-6 border-t mt-8">
+                    <div class="flex justify-end items-center">
+                        <p id="formMessage" class="text-sm mr-auto"></p>
+                        <button type="submit" id="saveSettingsBtn"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 border border-transparent rounded-lg shadow-md text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+    // --- Sidebar Collapse/Expand (matches dashboard.html) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarExpand = document.getElementById('sidebarExpand');
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('-translate-x-0');
+            sidebarCollapse.classList.add('hidden');
+            sidebarExpand.classList.remove('hidden');
+        }
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('-translate-x-0');
+            sidebarCollapse.classList.remove('hidden');
+            sidebarExpand.classList.add('hidden');
+        }
+        if (sidebarCollapse) {
+            sidebarCollapse.addEventListener('click', closeSidebar);
+        }
+        if (sidebarExpand) {
+            sidebarExpand.addEventListener('click', openSidebar);
+        }
+        // Responsive: auto close on small screens
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        // --- Payment Methods Logic (unchanged) ---
+        const paymentMethodsList = document.getElementById('paymentMethodsList');
+        const addPaymentMethodForm = document.getElementById('addPaymentMethodForm');
+        const paymentMethodType = document.getElementById('paymentMethodType');
+        const paymentMethodDetails = document.getElementById('paymentMethodDetails');
+
+        function getPaymentMethods() {
+            return JSON.parse(localStorage.getItem('invoicifyPaymentMethods') || '[]');
+        }
+        function savePaymentMethods(methods) {
+            localStorage.setItem('invoicifyPaymentMethods', JSON.stringify(methods));
+        }
+        function renderPaymentMethods() {
+            const methods = getPaymentMethods();
+            paymentMethodsList.innerHTML = '';
+            if (methods.length === 0) {
+                paymentMethodsList.innerHTML = '<p class="text-gray-500 text-sm">No payment methods added yet.</p>';
+                return;
+            }
+            methods.forEach((method, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-3 py-2';
+                div.innerHTML = `<span><span class="font-medium text-gray-700">${method.type}:</span> <span class="text-gray-600">${method.details}</span></span>
+                    <button type="button" data-idx="${idx}" class="text-red-500 hover:text-red-700 text-sm ml-2 remove-payment-method">Remove</button>`;
+                paymentMethodsList.appendChild(div);
+            });
+        }
+        addPaymentMethodForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const type = paymentMethodType.value.trim();
+            const details = paymentMethodDetails.value.trim();
+            if (!type || !details) return;
+            const methods = getPaymentMethods();
+            methods.push({ type, details });
+            savePaymentMethods(methods);
+            renderPaymentMethods();
+            paymentMethodDetails.value = '';
+        });
+        paymentMethodsList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-payment-method')) {
+                const idx = parseInt(e.target.getAttribute('data-idx'));
+                const methods = getPaymentMethods();
+                methods.splice(idx, 1);
+                savePaymentMethods(methods);
+                renderPaymentMethods();
+            }
+        });
+        renderPaymentMethods();
+
+        // --- Form Elements ---
+        const settingsForm = document.getElementById('settingsForm');
+        const businessNameInput = document.getElementById('businessName');
+        const businessNameError = document.getElementById('businessNameError');
+        const defaultCurrencySelect = document.getElementById('defaultCurrency');
+        const defaultCurrencyError = document.getElementById('defaultCurrencyError');
+        const businessLogoInput = document.getElementById('businessLogo');
+        const businessLogoError = document.getElementById('businessLogoError');
+        const logoPreview = document.getElementById('logoPreview');
+        const businessLogoUpload = document.getElementById('businessLogoUpload');
+        const businessLogoUploadError = document.getElementById('businessLogoUploadError');
+        const formMessage = document.getElementById('formMessage');
+
+        // --- Logo Preview ---
+
+        businessLogoInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            businessLogoError.textContent = '';
+            if (url) {
+                try {
+                    new URL(url);
+                    logoPreview.src = url;
+                    logoPreview.classList.remove('hidden');
+                    logoPreview.onerror = () => {
+                        logoPreview.classList.add('hidden');
+                        businessLogoError.textContent = 'Could not load image from URL.';
+                    };
+                } catch (_) {
+                    logoPreview.classList.add('hidden');
+                }
+            } else {
+                logoPreview.classList.add('hidden');
+            }
+        });
+
+        // --- Image Upload Section ---
+        businessLogoUpload.addEventListener('change', function() {
+            businessLogoUploadError.textContent = '';
+            const file = this.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                businessLogoUploadError.textContent = 'Please select a valid image file.';
+                return;
+            }
+            if (file.size > 1024 * 1024) { // 1MB
+                businessLogoUploadError.textContent = 'Image size must be less than 1MB.';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.classList.remove('hidden');
+                businessLogoInput.value = '';
+                businessLogoError.textContent = '';
+            };
+            reader.readAsDataURL(file);
+        });
+
+
+        // --- Form Validation ---
+        function validateForm() {
+            let isValid = true;
+            // Business Name
+            if (!businessNameInput.value.trim()) {
+                businessNameError.textContent = 'Business name is required.';
+                businessNameInput.classList.add('error');
+                isValid = false;
+            } else {
+                businessNameError.textContent = '';
+                businessNameInput.classList.remove('error');
+            }
+
+            // Default Currency
+            if (!defaultCurrencySelect.value) { // Should always have a value, but good practice
+                defaultCurrencyError.textContent = 'Default currency is required.';
+                defaultCurrencySelect.classList.add('error');
+                isValid = false;
+            } else {
+                defaultCurrencyError.textContent = '';
+                defaultCurrencySelect.classList.remove('error');
+            }
+            
+            // Business Logo URL (optional, but if provided, check basic format)
+            const logoUrl = businessLogoInput.value.trim();
+            if (logoUrl) {
+                try {
+                    new URL(logoUrl);
+                    businessLogoError.textContent = '';
+                    businessLogoInput.classList.remove('error');
+                } catch (_) {
+                    businessLogoError.textContent = 'Invalid URL format for logo.';
+                    businessLogoInput.classList.add('error');
+                    isValid = false;
+                }
+            } else {
+                 businessLogoError.textContent = ''; // Clear error if field is empty (optional)
+                 businessLogoInput.classList.remove('error');
+            }
+
+            return isValid;
+        }
+
+        // --- Load Settings (Placeholder) ---
+        // In a real app, load these from storage.js
+        function loadSettings() {
+            const savedSettings = JSON.parse(localStorage.getItem('invoicifySettings')) || {};
+            businessNameInput.value = savedSettings.businessName || 'My Awesome Business';
+            businessLogoInput.value = savedSettings.businessLogo || '';
+            if (savedSettings.businessLogo) {
+                logoPreview.src = savedSettings.businessLogo;
+                logoPreview.classList.remove('hidden');
+            } else {
+                logoPreview.src = '#';
+                logoPreview.classList.add('hidden');
+            }
+            document.getElementById('businessAddress').value = savedSettings.businessAddress || '123 Main St, Anytown, USA';
+            document.getElementById('businessContact').value = savedSettings.businessContact || 'contact@awesome.biz | (555) 123-4567';
+            defaultCurrencySelect.value = savedSettings.defaultCurrency || 'USD';
+            document.getElementById('invoiceNumberFormat').value = savedSettings.invoiceNumberFormat || 'INV-{YYYY}-{NNNN}';
+            document.getElementById('defaultNotes').value = savedSettings.defaultNotes || 'Thank you for your business!';
+            document.getElementById('notifyPayment').checked = savedSettings.notifyPayment !== undefined ? savedSettings.notifyPayment : true;
+            document.getElementById('notifyClientInvoiceSent').checked = savedSettings.notifyClientInvoiceSent !== undefined ? savedSettings.notifyClientInvoiceSent : true;
+            document.getElementById('autoOverdueReminders').checked = savedSettings.autoOverdueReminders !== undefined ? savedSettings.autoOverdueReminders : false;
+            // Payment Methods
+            renderPaymentMethods();
+        }
+        loadSettings(); // Load settings on page load
+
+        // --- Form Submission ---
+        settingsForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            formMessage.textContent = '';
+            formMessage.className = 'text-sm mr-auto';
+
+            if (validateForm()) {
+                const formData = new FormData(settingsForm);
+                const settingsData = {};
+                // FormData doesn't pick up unchecked checkboxes, so handle them manually
+                settingsData.businessName = formData.get('businessName');
+                // Prefer uploaded image (as DataURL) if present, else use URL
+                let logoDataUrl = '';
+                if (logoPreview && !logoPreview.classList.contains('hidden') && logoPreview.src && logoPreview.src.startsWith('data:image/')) {
+                    logoDataUrl = logoPreview.src;
+                }
+                settingsData.businessLogo = logoDataUrl || formData.get('businessLogo');
+                settingsData.businessAddress = formData.get('businessAddress');
+                settingsData.businessContact = formData.get('businessContact');
+                settingsData.defaultCurrency = formData.get('defaultCurrency');
+                settingsData.invoiceNumberFormat = formData.get('invoiceNumberFormat');
+                settingsData.defaultNotes = formData.get('defaultNotes');
+                settingsData.notifyPayment = document.getElementById('notifyPayment').checked;
+                settingsData.notifyClientInvoiceSent = document.getElementById('notifyClientInvoiceSent').checked;
+                settingsData.autoOverdueReminders = document.getElementById('autoOverdueReminders').checked;
+
+
+                // TODO: Integrate with storage.js to save settings
+                localStorage.setItem('invoicifySettings', JSON.stringify(settingsData)); // Demo save
+                // Save payment methods (already handled by their own logic)
+                // Save notification preferences (already in settingsData)
+                // Save all other settings
+                formMessage.textContent = 'Settings saved successfully!';
+                formMessage.classList.add('text-green-600');
+                setTimeout(() => {
+                    formMessage.textContent = '';
+                }, 3000);
+                // Reload settings to reflect changes
+                loadSettings();
+            } else {
+                formMessage.textContent = 'Please correct the errors in the form.';
+                formMessage.classList.add('text-red-600');
+            }
+        });
+
+        // --- Data Management Button Placeholders ---
+        document.getElementById('backupDataBtn').addEventListener('click', () => {
+            // TODO: Implement data backup logic (e.g., from storage.js to JSON download)
+            const allData = {
+                settings: JSON.parse(localStorage.getItem('invoicifySettings')) || {},
+                invoices: JSON.parse(localStorage.getItem('invoicifyInvoices')) || [], // Assuming storage keys
+                clients: JSON.parse(localStorage.getItem('invoicifyClients')) || []   // Assuming storage keys
+            };
+            const jsonString = JSON.stringify(allData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoicify_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('Data backup initiated (simulated JSON download). Check your downloads folder.');
+        });
+
+        document.getElementById('exportDataBtn').addEventListener('click', () => {
+            // TODO: Implement data export logic (e.g., to CSV)
+            alert('Data export to CSV initiated (simulated). This feature requires specific CSV generation logic.');
+        });
+
+    });
+    </script>
+
+</body>
+</html>

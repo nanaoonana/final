@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .form-input.error {
+            border-color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+        .password-strength {
+            height: 5px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 5px;
+        }
+        .strength-bar {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .strength-weak { width: 33%; background-color: #ef5350; } /* red */
+        .strength-medium { width: 66%; background-color: #ffc107; } /* yellow */
+        .strength-strong { width: 100%; background-color: #4caf50; } /* green */
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="index.html" class="font-bold text-3xl text-blue-600">Invoicify</a>
+            <h2 class="text-2xl font-semibold text-gray-700 mt-2">Create Your Account</h2>
+        </div>
+
+        <form id="signupForm" novalidate>
+            <!-- Name -->
+            <div class="mb-4">
+                <label for="name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                <input type="text" id="name" name="name" required
+                       class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="error-message mt-1" id="nameError"></p>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                <input type="email" id="email" name="email" required
+                       class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="error-message mt-1" id="emailError"></p>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-medium mb-2">Password</label>
+                <input type="password" id="password" name="password" required
+                       class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="password-strength">
+                    <div class="strength-bar" id="passwordStrengthBar"></div>
+                </div>
+                <p class="error-message mt-1" id="passwordError"></p>
+                <p class="text-xs text-gray-500 mt-1">Use 8 or more characters with a mix of letters, numbers & symbols.</p>
+            </div>
+
+            <!-- Plan Selection -->
+            <div class="mb-6">
+                <label for="plan" class="block text-gray-700 font-medium mb-2">Choose a Plan</label>
+                <select id="plan" name="plan"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                    <option value="free">Free Trial (14 days – All features, no credit card required)</option>
+                    <option value="basic">Basic (GHS 29/mo – Up to 10 invoices/month)</option>
+                    <option value="professional" selected>Professional (GHS 79/mo – Up to 50 invoices/month)</option>
+                    <option value="business">Business (GHS 199/mo – Unlimited invoices, team access)</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                Create Account
+            </button>
+
+            <div id="formMessage" class="mt-4 text-center"></div>
+        </form>
+
+        <p class="text-center text-gray-600 mt-6">
+            Already have an account? <a href="login.html" class="text-blue-500 hover:underline font-medium">Log in</a>
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('signupForm');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const planSelect = document.getElementById('plan');
+
+            const nameError = document.getElementById('nameError');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+            const formMessage = document.getElementById('formMessage');
+
+            // --- Input Validation ---
+            function validateName() {
+                if (!nameInput.value.trim()) {
+                    nameError.textContent = 'Full name is required.';
+                    nameInput.classList.add('error');
+                    return false;
+                }
+                nameError.textContent = '';
+                nameInput.classList.remove('error');
+                return true;
+            }
+
+            function validateEmail() {
+                const emailValue = emailInput.value.trim();
+                if (!emailValue) {
+                    emailError.textContent = 'Email is required.';
+                    emailInput.classList.add('error');
+                    return false;
+                }
+                // Basic email regex
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(emailValue)) {
+                    emailError.textContent = 'Please enter a valid email address.';
+                    emailInput.classList.add('error');
+                    return false;
+                }
+                emailError.textContent = '';
+                emailInput.classList.remove('error');
+                return true;
+            }
+
+            function validatePassword() {
+                const passwordValue = passwordInput.value;
+                let errors = [];
+
+                if (passwordValue.length < 8) {
+                    errors.push('Password must be at least 8 characters long.');
+                }
+                if (!/[A-Z]/.test(passwordValue)) {
+                    errors.push('Include at least one uppercase letter.');
+                }
+                if (!/[a-z]/.test(passwordValue)) {
+                    errors.push('Include at least one lowercase letter.');
+                }
+                if (!/\d/.test(passwordValue)) {
+                    errors.push('Include at least one number.');
+                }
+                if (!/[^A-Za-z0-9]/.test(passwordValue)) {
+                    errors.push('Include at least one symbol (e.g., !, @, #).');
+                }
+
+                if (errors.length > 0) {
+                    passwordError.innerHTML = errors.join('<br>');
+                    passwordInput.classList.add('error');
+                    return false;
+                }
+                passwordError.textContent = '';
+                passwordInput.classList.remove('error');
+                return true;
+            }
+
+            // --- Password Strength ---
+            function updatePasswordStrength() {
+                const password = passwordInput.value;
+                let strength = 0;
+                if (password.length >= 8) strength += 1;
+                if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength += 1;
+                if (/\d/.test(password)) strength += 1;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 1; // Symbol
+
+                passwordStrengthBar.className = 'strength-bar'; // Reset classes
+                if (strength <= 1 && password.length > 0) {
+                    passwordStrengthBar.classList.add('strength-weak');
+                } else if (strength === 2 || strength === 3) {
+                    passwordStrengthBar.classList.add('strength-medium');
+                } else if (strength >= 4) {
+                    passwordStrengthBar.classList.add('strength-strong');
+                }
+            }
+
+            // --- Event Listeners ---
+            nameInput.addEventListener('blur', validateName);
+            emailInput.addEventListener('blur', validateEmail);
+            passwordInput.addEventListener('blur', validatePassword);
+            passwordInput.addEventListener('input', updatePasswordStrength);
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent actual submission for this demo
+
+                // Clear previous messages
+                formMessage.textContent = '';
+                formMessage.className = 'mt-4 text-center';
+
+
+                const isNameValid = validateName();
+                const isEmailValid = validateEmail();
+                const isPasswordValid = validatePassword();
+
+                if (isNameValid && isEmailValid && isPasswordValid) {
+                    // Simulate form submission
+                    console.log('Form submitted successfully:');
+                    console.log('Name:', nameInput.value);
+                    console.log('Email:', emailInput.value);
+                    console.log('Plan:', planSelect.value);
+                    // Normally, you would send this data to a server.
+
+                    formMessage.textContent = 'Account created successfully! Redirecting...';
+                    formMessage.classList.add('text-green-600');
+
+                    // Clear form fields
+                    form.reset();
+                    updatePasswordStrength(); // Reset strength bar
+                    nameInput.classList.remove('error');
+                    emailInput.classList.remove('error');
+                    passwordInput.classList.remove('error');
+                    nameError.textContent = '';
+                    emailError.textContent = '';
+                    passwordError.textContent = '';
+
+
+                    // Simulate redirect after a short delay
+                    setTimeout(() => {
+                        // For this example, let's assume successful signup leads to the dashboard
+                        // In a real app, the server would handle session creation and redirection.
+                        // window.location.href = 'dashboard.html';
+                        formMessage.textContent = 'Account created! (Simulated redirect to dashboard.html)'; // Keep message for demo
+                    }, 2000);
+
+                } else {
+                    formMessage.textContent = 'Please correct the errors in the form.';
+                    formMessage.classList.add('text-red-600');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

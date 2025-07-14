@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Placeholder for main.js and notifications.js if needed for layout elements -->
+    <!-- <script src="main.js" defer></script> -->
+    <script src="notifications.js" defer></script>
+    <style>
+        /* Basic sidebar styling (can be expanded in main.js) */
+        /* #sidebar.collapsed { transform: translateX(-100%); } */
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 min-h-screen p-4 space-y-6 transition-transform duration-300 ease-in-out border-r border-gray-200 shadow-md -translate-x-0 fixed left-0 top-0 h-full" style="z-index: 40;">
+        <div class="text-center">
+            <a href="index.html" class="text-2xl font-semibold text-white">Invoicify</a>
+        </div>
+
+        <button id="sidebarCollapse" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 focus:outline-none md:hidden" title="Collapse Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <nav class="space-y-2">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-2 rounded-md bg-slate-700 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="invoices.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                </svg>
+                <span>Invoices</span>
+            </a>
+            <a href="clients.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                <span>Clients</span>
+            </a>
+            <a href="settings.html" class="flex items-center space-x-3 px-4 py-2 rounded-md hover:bg-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.835 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.835 2.942-.734 2.106-2.106a1.533 1.533 0 01-.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.835-1.372-.734-2.942-2.106-2.106A1.532 1.532 0 0111.49 3.17zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-slate-700">
+            <a href="index.html" class="flex items-center space-x-3 px-4 py-2 rounded-md text-slate-400 hover:bg-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                </svg>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col relative md:ml-64 ml-0 transition-all duration-300">
+        <button id="sidebarExpand" class="fixed top-4 left-4 z-30 bg-white border border-gray-200 shadow p-2 rounded-full text-gray-400 hover:text-blue-600 focus:outline-none md:hidden hidden" title="Expand Sidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sticky top-0 z-20">
+            <h1 class="text-xl font-semibold text-gray-700">Dashboard Overview</h1>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Currency Selector -->
+                <div>
+                    <select id="currencySelector" class="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="USD" selected>USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="NGN">NGN (₦)</option>
+                        <option value="JPY">JPY (¥)</option>
+                        <option value="GHS">GHS (₵)</option>
+                    </select>
+                </div>
+                <!-- Notifications (placeholder, functionality via notifications.js later) -->
+                <button class="relative text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span> <!-- Notification dot -->
+                </button>
+                <!-- User Profile Dropdown (placeholder) -->
+                <div class="relative">
+                    <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <img id="topBarLogo" class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=User+Name&background=random&color=fff" alt="User Avatar">
+                    </button>
+                    <!-- Dropdown menu (hidden by default) -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-2 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+            <!-- Key Stats -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-sm font-medium text-gray-500">Total Revenue</h3>
+                    <p class="text-3xl font-semibold text-gray-800 mt-1">$12,345.67</p>
+                    <p class="text-xs text-green-500 mt-1">+5.2% from last month</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-sm font-medium text-gray-500">Active Invoices</h3>
+                    <p class="text-3xl font-semibold text-gray-800 mt-1">82</p>
+                    <p class="text-xs text-gray-500 mt-1">15 Overdue</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-sm font-medium text-gray-500">Total Clients</h3>
+                    <p class="text-3xl font-semibold text-gray-800 mt-1">45</p>
+                    <p class="text-xs text-green-500 mt-1">+3 New this month</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-sm font-medium text-gray-500">Pending Payments</h3>
+                    <p class="text-3xl font-semibold text-gray-800 mt-1">$3,450.00</p>
+                    <p class="text-xs text-yellow-500 mt-1">Awaiting confirmation</p>
+                </div>
+            </section>
+
+            <!-- Quick Links & Chart -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <!-- Income Chart -->
+                <div class="lg:col-span-2 bg-white p-4 md:p-6 rounded-lg shadow-md" style="height: 350px;">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Income Over Time</h3>
+                    <canvas id="incomeChart" class="w-full h-full" style="height: 260px;"></canvas>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="bg-white p-4 md:p-6 rounded-lg shadow-md space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                    <a href="invoice-new.html" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg">
+                        Create New Invoice
+                    </a>
+                    <a href="clients.html#add-new" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg">
+                        Add New Client
+                    </a>
+                    <a href="invoices.html?filter=overdue" class="block w-full text-center bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium py-3 px-4 rounded-lg">
+                        View Overdue Invoices
+                    </a>
+                    <a href="settings.html" class="block w-full text-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg">
+                        Account Settings
+                    </a>
+                </div>
+            </section>
+
+            <!-- Recent Transactions (Placeholder Table) -->
+            <section class="bg-white p-4 md:p-6 rounded-lg shadow-md overflow-x-auto">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Recent Transactions</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Example Row 1 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">INV-2024-001</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Tech Solutions Inc.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$1,250.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                                </td>
+                            </tr>
+                            <!-- Example Row 2 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">INV-2024-002</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Creative Designs LLC</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-07-12</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$800.50</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                </td>
+                            </tr>
+                             <!-- Example Row 3 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">INV-2024-003</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">WebWorks Co.</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-06-20</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$2,100.00</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Overdue</span>
+                                </td>
+                            </tr>
+                            <!-- More rows can be added here -->
+                        </tbody>
+                    </table>
+                </div>
+                 <div class="mt-4 text-right">
+                    <a href="invoices.html" class="text-xs sm:text-sm text-blue-600 hover:underline">View All Transactions &rarr;</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Sidebar Collapse/Expand ---
+            const sidebar = document.getElementById('sidebar');
+            const sidebarCollapse = document.getElementById('sidebarCollapse');
+            const sidebarExpand = document.getElementById('sidebarExpand');
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('-translate-x-0');
+                sidebarExpand.classList.remove('hidden');
+            }
+            function openSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('-translate-x-0');
+                sidebarExpand.classList.add('hidden');
+            }
+            if (sidebarCollapse) {
+                sidebarCollapse.addEventListener('click', closeSidebar);
+            }
+            if (sidebarExpand) {
+                sidebarExpand.addEventListener('click', openSidebar);
+            }
+            // Responsive: auto close on small screens
+            function handleResize() {
+                if (window.innerWidth < 768) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            }
+            window.addEventListener('resize', handleResize);
+            handleResize();
+
+            // --- Currency Conversion Logic ---
+            const currencySelector = document.getElementById('currencySelector');
+            // Example rates (as of July 2025, for demo only)
+            const currencyRates = {
+                USD: { symbol: '$', rate: 1, locale: 'en-US', name: 'USD' },
+                EUR: { symbol: '€', rate: 0.92, locale: 'de-DE', name: 'EUR' },
+                GBP: { symbol: '£', rate: 0.78, locale: 'en-GB', name: 'GBP' },
+                NGN: { symbol: '₦', rate: 1550, locale: 'en-NG', name: 'NGN' },
+                JPY: { symbol: '¥', rate: 158, locale: 'ja-JP', name: 'JPY' },
+                GHS: { symbol: '₵', rate: 15.5, locale: 'en-GH', name: 'GHS' }, // Ghanaian Cedi
+            };
+            // Store base USD values for conversion
+            const baseStats = {
+                revenue: 12345.67,
+                pending: 3450.00,
+                chart: [1200, 1900, 3000, 5000, 2300, 3200, 4500, 3800, 5200, 6000, 7500, 8200],
+                table: [1250.00, 800.50, 2100.00],
+            };
+            // --- Income Chart ---
+            const ctx = document.getElementById('incomeChart')?.getContext('2d');
+            let incomeChart;
+            function getCurrencyInfo() {
+                const curr = currencySelector.value;
+                return currencyRates[curr] || currencyRates['USD'];
+            }
+            function formatCurrency(val, info) {
+                return new Intl.NumberFormat(info.locale, { style: 'currency', currency: info.name, maximumFractionDigits: 2 }).format(val);
+            }
+            function updateStats() {
+                const info = getCurrencyInfo();
+                // Update Total Revenue
+                const revenueEl = document.querySelector('section.grid > div:nth-child(1) p.text-3xl');
+                if (revenueEl) revenueEl.textContent = formatCurrency(baseStats.revenue * info.rate, info);
+                // Update Pending Payments
+                const pendingEl = document.querySelector('section.grid > div:nth-child(4) p.text-3xl');
+                if (pendingEl) pendingEl.textContent = formatCurrency(baseStats.pending * info.rate, info);
+                // Update Chart
+                if (incomeChart) {
+                    incomeChart.data.datasets[0].data = baseStats.chart.map(v => v * info.rate);
+                    incomeChart.data.datasets[0].label = `Income (${info.symbol})`;
+                    incomeChart.options.scales.y.ticks.callback = function(value) {
+                        return info.symbol + value.toLocaleString();
+                    };
+                    incomeChart.options.plugins.tooltip.callbacks.label = function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) label += ': ';
+                        if (context.parsed.y !== null) {
+                            label += formatCurrency(context.parsed.y, info);
+                        }
+                        return label;
+                    };
+                    incomeChart.update();
+                }
+                // Update Table Amounts
+                const tableAmounts = document.querySelectorAll('section.bg-white table tbody tr td:nth-child(4)');
+                tableAmounts.forEach((td, idx) => {
+                    if (baseStats.table[idx] !== undefined) {
+                        td.textContent = formatCurrency(baseStats.table[idx] * info.rate, info);
+                    }
+                });
+            }
+            if (ctx) {
+                incomeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Income ($)',
+                            data: baseStats.chart,
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.warn('incomeChart canvas element not found.');
+            }
+            // Initial update for currency
+            updateStats();
+            if (currencySelector) {
+                currencySelector.addEventListener('change', updateStats);
+            }
+            // --- Notification Demo for Invoice Actions (for dashboard demo only) ---
+            // Simulate notification after invoice actions (for demo/testing)
+            function simulateInvoiceAction(action) {
+                if (typeof showNotification === 'function') {
+                    let msg = '';
+                    if (action === 'save') msg = 'Invoice saved successfully!';
+                    if (action === 'send') msg = 'Invoice sent to client!';
+                    if (action === 'download') msg = 'Invoice PDF downloaded!';
+                    if (msg) showNotification(msg, 'success');
+                }
+            }
+            // For demonstration: add buttons to trigger notifications
+            if (window.location.hash === '#demo-notifications') {
+                const main = document.querySelector('main');
+                if (main) {
+                    const demoDiv = document.createElement('div');
+                    demoDiv.className = 'mb-6 flex gap-2';
+                    demoDiv.innerHTML = `
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" onclick="simulateInvoiceAction('save')">Simulate Save</button>
+                        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="simulateInvoiceAction('send')">Simulate Send</button>
+                        <button class="bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded" onclick="simulateInvoiceAction('download')">Simulate Download</button>
+                    `;
+                    main.prepend(demoDiv);
+                }
+                // Expose to global for button onclick
+                window.simulateInvoiceAction = simulateInvoiceAction;
+            }
+            // --- Top Bar Logo Update ---
+            function updateTopBarLogo() {
+                try {
+                    const settings = JSON.parse(localStorage.getItem('invoicifySettings')) || {};
+                    const logoUrl = settings.businessLogo;
+                    const logoImg = document.getElementById('topBarLogo');
+                    if (logoImg && logoUrl && logoUrl.trim() !== '') {
+                        logoImg.src = logoUrl;
+                    } else if (logoImg) {
+                        logoImg.src = 'https://ui-avatars.com/api/?name=User+Name&background=random&color=fff';
+                    }
+                } catch (e) {}
+            }
+            updateTopBarLogo();
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'invoicifySettings') updateTopBarLogo();
+            });
+        });
+    </script>
+
+</body>
+</html>

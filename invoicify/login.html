@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .form-input.error {
+            border-color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="index.html" class="font-bold text-3xl text-blue-600">Invoicify</a>
+            <h2 class="text-2xl font-semibold text-gray-700 mt-2">Welcome Back!</h2>
+        </div>
+
+        <form id="loginForm" novalidate>
+            <!-- Email -->
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                <input type="email" id="email" name="email" required
+                       class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="error-message mt-1" id="emailError"></p>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center">
+                    <label for="password" class="block text-gray-700 font-medium">Password</label>
+                    <a href="auth-reset.html" class="text-sm text-blue-500 hover:underline">Forgot password?</a>
+                </div>
+                <input type="password" id="password" name="password" required
+                       class="form-input w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="error-message mt-1" id="passwordError"></p>
+            </div>
+
+            <!-- Remember Me -->
+            <div class="mb-6 flex items-center">
+                <input type="checkbox" id="rememberMe" name="rememberMe" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Remember me</label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                Log In
+            </button>
+
+            <div id="formMessage" class="mt-4 text-center"></div>
+        </form>
+
+        <p class="text-center text-gray-600 mt-6">
+            Don't have an account? <a href="signup.html" class="text-blue-500 hover:underline font-medium">Sign up</a>
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const formMessage = document.getElementById('formMessage');
+
+            // --- Input Validation ---
+            function validateEmail() {
+                const emailValue = emailInput.value.trim();
+                if (!emailValue) {
+                    emailError.textContent = 'Email is required.';
+                    emailInput.classList.add('error');
+                    return false;
+                }
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(emailValue)) {
+                    emailError.textContent = 'Please enter a valid email address.';
+                    emailInput.classList.add('error');
+                    return false;
+                }
+                emailError.textContent = '';
+                emailInput.classList.remove('error');
+                return true;
+            }
+
+            function validatePassword() {
+                const passwordValue = passwordInput.value;
+                if (!passwordValue) {
+                    passwordError.textContent = 'Password is required.';
+                    passwordInput.classList.add('error');
+                    return false;
+                }
+                // Basic length check, real validation would be against stored hash
+                if (passwordValue.length < 6) { 
+                    // Assuming min length for any password, even if not as strict as signup
+                    passwordError.textContent = 'Password seems too short.';
+                    // passwordInput.classList.add('error'); // Optional: less strict error display for login
+                    // return false; 
+                }
+                passwordError.textContent = '';
+                passwordInput.classList.remove('error');
+                return true;
+            }
+
+            // --- Event Listeners ---
+            emailInput.addEventListener('blur', validateEmail);
+            emailInput.addEventListener('input', () => { // Clear error on input
+                if (emailInput.classList.contains('error')) {
+                    emailError.textContent = '';
+                    emailInput.classList.remove('error');
+                }
+            });
+            passwordInput.addEventListener('blur', validatePassword);
+            passwordInput.addEventListener('input', () => { // Clear error on input
+                 if (passwordInput.classList.contains('error')) {
+                    passwordError.textContent = '';
+                    passwordInput.classList.remove('error');
+                }
+            });
+
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); 
+
+                formMessage.textContent = '';
+                formMessage.className = 'mt-4 text-center';
+
+                const isEmailValid = validateEmail();
+                const isPasswordValid = validatePassword(); // Basic check
+
+                if (isEmailValid && isPasswordValid) {
+                    // Simulate form submission and server validation
+                    const email = emailInput.value;
+                    const password = passwordInput.value;
+                    const rememberMe = rememberMeCheckbox.checked;
+
+                    console.log('Login attempt:');
+                    console.log('Email:', email);
+                    console.log('Remember Me:', rememberMe);
+                    // In a real app, you'd send this to a server.
+                    // The server would validate credentials.
+
+                    // --- SIMULATED SERVER RESPONSE ---
+                    // For demo, let's assume a dummy user/pass and success/fail scenarios
+                    if (email === "user@example.com" && password === "Password123!") {
+                        formMessage.textContent = 'Login successful! Redirecting...';
+                        formMessage.classList.add('text-green-600');
+                        
+                        // Clear form
+                        form.reset();
+                        emailInput.classList.remove('error');
+                        passwordInput.classList.remove('error');
+                        emailError.textContent = '';
+                        passwordError.textContent = '';
+
+                        // Simulate redirect
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1500);
+                    } else {
+                        formMessage.textContent = 'Invalid email or password. Please try again.';
+                        formMessage.classList.add('text-red-600');
+                        passwordInput.classList.add('error'); // Highlight password field on auth failure
+                        passwordError.textContent = 'Invalid credentials.'; // More specific error if possible
+                    }
+                } else {
+                    formMessage.textContent = 'Please correct the errors in the form.';
+                    formMessage.classList.add('text-red-600');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

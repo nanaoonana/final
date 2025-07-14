@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Invoicify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .form-input.error {
+            border-color: red;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+        .success-message {
+            color: green;
+            font-size: 0.875em;
+        }
+        /* Basic transition for screen visibility */
+        .screen {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .screen-hidden {
+            opacity: 0;
+            transform: scale(0.98);
+            pointer-events: none;
+            position: absolute; /* Take out of flow when hidden */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+        <div class="text-center mb-6">
+            <a href="index.html" class="font-bold text-3xl text-blue-600">Invoicify</a>
+        </div>
+
+        <!-- Screen 1: Request Reset Email -->
+        <div id="requestScreen" class="screen">
+            <h2 class="text-2xl font-semibold text-gray-700 text-center mb-1">Forgot Your Password?</h2>
+            <p class="text-gray-600 text-center mb-6">No problem! Enter your email address below and we'll send you a link to reset your password.</p>
+            
+            <form id="requestResetForm" novalidate>
+                <div class="mb-4">
+                    <label for="resetEmail" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                    <input type="email" id="resetEmail" name="resetEmail" required
+                           class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="you@example.com">
+                    <p class="error-message mt-1" id="resetEmailError"></p>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                    Send Password Reset Link
+                </button>
+                <div id="requestMessage" class="mt-3 text-center text-sm"></div>
+            </form>
+            <p class="text-center text-gray-600 mt-6">
+                Remembered your password? <a href="login.html" class="text-blue-500 hover:underline font-medium">Log in</a>
+            </p>
+        </div>
+
+        <!-- Screen 2: Confirmation Message -->
+        <div id="confirmationScreen" class="screen screen-hidden">
+            <div class="text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 19v-8.25A4.5 4.5 0 017.5 6.5H16.5a4.5 4.5 0 014.5 4.5V19M3 19H2.25A2.25 2.25 0 000 21.25V21.5h24v-.25A2.25 2.25 0 0021.75 19H21M3 19v-4.5A2.5 2.5 0 015.5 12H8c2.333 0 4.333 1.294 5.333 3M21 19v-4.5A2.5 2.5 0 0018.5 12H16c-2.333 0-4.333 1.294-5.333 3" />
+                </svg>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-2">Check Your Email!</h2>
+                <p class="text-gray-600 mb-6">
+                    If an account exists for <strong id="submittedEmailDisplay">you@example.com</strong>, you will receive an email with instructions on how to reset your password.
+                </p>
+                <p class="text-gray-600 mb-6 text-sm">
+                    Didn't receive the email? Check your spam folder, or <button id="resendEmailBtn" class="text-blue-500 hover:underline font-medium">try sending it again</button>.
+                </p>
+                <a href="login.html" class="w-full block text-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                    Back to Login
+                </a>
+            </div>
+        </div>
+        
+        <!-- Screen 3: Actual Password Reset Form (if handling token on client-side, usually server-side) -->
+        <!-- This part is often on a separate page linked from the email. -->
+        <!-- For this example, it's included for completeness of UI flow if a token was present. -->
+        <div id="resetPasswordScreen" class="screen screen-hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 text-center mb-6">Set New Password</h2>
+            <form id="newPasswordForm" novalidate>
+                <input type="hidden" id="resetToken" name="resetToken" value=""> <!-- Token from URL -->
+                
+                <div class="mb-4">
+                    <label for="newPassword" class="block text-gray-700 font-medium mb-2">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required
+                           class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="error-message mt-1" id="newPasswordError"></p>
+                </div>
+                <div class="mb-6">
+                    <label for="confirmPassword" class="block text-gray-700 font-medium mb-2">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required
+                           class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="error-message mt-1" id="confirmPasswordError"></p>
+                </div>
+                <button type="submit"
+                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                    Reset Password
+                </button>
+                <div id="resetStatusMessage" class="mt-3 text-center text-sm"></div>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        const requestScreen = document.getElementById('requestScreen');
+        const confirmationScreen = document.getElementById('confirmationScreen');
+        const resetPasswordScreen = document.getElementById('resetPasswordScreen'); // For token-based reset
+
+        const requestResetForm = document.getElementById('requestResetForm');
+        const resetEmailInput = document.getElementById('resetEmail');
+        const resetEmailError = document.getElementById('resetEmailError');
+        const requestMessage = document.getElementById('requestMessage');
+        const submittedEmailDisplay = document.getElementById('submittedEmailDisplay');
+        const resendEmailBtn = document.getElementById('resendEmailBtn');
+
+        const newPasswordForm = document.getElementById('newPasswordForm');
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const newPasswordError = document.getElementById('newPasswordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const resetStatusMessage = document.getElementById('resetStatusMessage');
+        const resetTokenInput = document.getElementById('resetToken');
+
+        let lastSubmittedEmail = '';
+
+
+        function showScreen(screenElement) {
+            requestScreen.classList.add('screen-hidden');
+            confirmationScreen.classList.add('screen-hidden');
+            resetPasswordScreen.classList.add('screen-hidden');
+            
+            screenElement.classList.remove('screen-hidden');
+        }
+
+        // --- Request Reset Email Logic ---
+        requestResetForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            resetEmailError.textContent = '';
+            requestMessage.textContent = '';
+            resetEmailInput.classList.remove('error');
+
+            const email = resetEmailInput.value.trim();
+            if (!email) {
+                resetEmailError.textContent = 'Email address is required.';
+                resetEmailInput.classList.add('error');
+                return;
+            }
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                resetEmailError.textContent = 'Please enter a valid email address.';
+                resetEmailInput.classList.add('error');
+                return;
+            }
+
+            // Simulate API call
+            console.log(`Simulating password reset request for: ${email}`);
+            lastSubmittedEmail = email; // Store for potential resend
+            
+            // UI update: Show loading/spinner on button (optional)
+            const submitButton = requestResetForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<svg class="animate-spin inline-block -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...`;
+
+            setTimeout(() => {
+                submittedEmailDisplay.textContent = email;
+                showScreen(confirmationScreen);
+                requestResetForm.reset(); // Clear the form
+                // Reset button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }, 1500); // Simulate network delay
+        });
+        
+        resendEmailBtn.addEventListener('click', () => {
+            if(lastSubmittedEmail) {
+                resetEmailInput.value = lastSubmittedEmail; // Pre-fill if user wants to resend for same email
+            }
+            showScreen(requestScreen);
+            requestMessage.textContent = 'Please try sending the reset link again.';
+            requestMessage.className = 'mt-3 text-center text-sm text-gray-600';
+        });
+
+
+        // --- Actual Password Reset Form Logic (Token-based) ---
+        newPasswordForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            newPasswordError.textContent = '';
+            confirmPasswordError.textContent = '';
+            resetStatusMessage.textContent = '';
+            newPasswordInput.classList.remove('error');
+            confirmPasswordInput.classList.remove('error');
+
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const token = resetTokenInput.value; // From hidden input, set by URL param
+
+            let isValid = true;
+            if (newPassword.length < 8) { // Basic password strength check
+                newPasswordError.textContent = 'Password must be at least 8 characters long.';
+                newPasswordInput.classList.add('error');
+                isValid = false;
+            }
+            if (newPassword !== confirmPassword) {
+                confirmPasswordError.textContent = 'Passwords do not match.';
+                confirmPasswordInput.classList.add('error');
+                isValid = false;
+            }
+            if (!token) { // Should not happen if logic is correct
+                resetStatusMessage.textContent = 'Invalid or missing reset token.';
+                resetStatusMessage.className = 'mt-3 text-center text-sm error-message';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Simulate API call to reset password
+            console.log(`Simulating password reset with token: ${token} for new password.`);
+            const submitButton = newPasswordForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<svg class="animate-spin inline-block -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Resetting...`;
+
+
+            setTimeout(() => {
+                // Simulate success
+                resetStatusMessage.textContent = 'Your password has been reset successfully!';
+                resetStatusMessage.className = 'mt-3 text-center text-sm success-message';
+                newPasswordForm.reset();
+                 // Reset button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+
+                setTimeout(() => {
+                    window.location.href = 'login.html'; // Redirect to login page
+                }, 2000);
+            }, 1500);
+        });
+
+
+        // --- Handle URL for token (simulated) ---
+        // In a real app, the server sends an email with a link like:
+        // yoursite.com/auth-reset.html?token=UNIQUE_RESET_TOKEN
+        // This script checks for that token.
+        function checkUrlForToken() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (token) {
+                console.log("Password reset token found in URL:", token);
+                resetTokenInput.value = token; // Populate hidden field
+                showScreen(resetPasswordScreen); // Show the form to set a new password
+            } else {
+                showScreen(requestScreen); // Default: show email request form
+            }
+        }
+
+        checkUrlForToken(); // Check on page load
+
+    </script>
+
+</body>
+</html>
